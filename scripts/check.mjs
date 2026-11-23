@@ -1,0 +1,233 @@
+// Panelin otomatik kontrolü (Playwright, Chromium).
+// Her ekranı 1440 / 1024 / 375 px'te açar, tam sayfa görüntü alır ve şunlara bakar:
+//   konsol ve sayfa hataları, yatay taşma (görünür alanın dışına çıkan öğe), 14 px altı yazı (kimlik kuralı),
+//   erişilebilirlik (axe-core, WCAG 2.1 A ve AA: ciddi ve kritik ihlal hata, diğerleri uyarı).
+// Ardından telefonda teknisyen akışını gerçek dokunmayla dener.
+//
+// Kullanım (geliştirme sunucusu açıkken):
+//   npm run check                 EN-açık ve TR-koyu
+//   npm run check -- --all        dört dil/tema birleşimi
+//   npm run check -- --no-shots   görüntü almadan yalnızca denetim
+//   npm run check -- --no-axe     erişilebilirlik denetimi olmadan (daha hızlı)
+//   BASE=http://localhost:4173 npm run check   başka adres (ör. vite preview)
+// Çıktı: output/checks/<genişlik>/<ekran>-<dil>-<tema>.png, output/checks/akis-*.png, output/checks/rapor.txt
+// Her çalıştırma yeni ve boş bir tarayıcı profiliyle açılır; kişisel tarayıcıya ve demo verisine dokunmaz.
+
+import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+
+const BASE = process.env.BASE ?? 'http://localhost:5190';
+const OUT = fileURLToPath(new URL('../output/checks/', import.meta.url));
+const ALL = process.argv.includes('--all');
+const SHOTS = !process.argv.includes('--no-shots');
+const AXE = !process.argv.includes('--no-axe');
+const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+
+const ROUTES = ['today', 'jobs', 'dispatch', 'stock', 'customers', 'invoices', 'reports', 'field'];
+const SIZES = [
+  { id: '1440', opts: { viewport: { width: 1440, height: 900 } } },
+  { id: '1024', opts: { viewport: { width: 1024, height: 768 } } },
+  { id: '375', opts: { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 } }
+];
+const COMBOS = ALL
+  ? [['en', 'light'], ['en', 'dark'], ['tr', 'light'], ['tr', 'dark']]
+  : [['en', 'light'], ['tr', 'dark']];
+
+/** Sayfa içinde çalışır: taşan öğeler ve 14 px altı yazılar */
+function audit() {
+  const vw = document.documentElement.clientWidth;
+  const hidden = (el) => {
+    const s = getComputedStyle(el);
+    return s.display === 'none' || s.visibility === 'hidden' || s.clip === 'rect(0px, 0px, 0px, 0px)' || el.closest('.sr-only');
+  };
+  // Kendi içinde kayan alanlar (sekme şeridi, planlama tahtası) taşma sayılmaz
+  const inScroller = (el) => {
+    for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+      const o = getComputedStyle(p).overflowX;
+      if (o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip') return true;
+    }
+    return false;
+  };
+  const name = (el) => el.tagName.toLowerCase() + (typeof el.className === 'string' && el.className ? '.' + el.className.trim().split(/\s+/).join('.') : '');
+  const over = [];
+  const small = new Map();
+  for (const el of document.body.querySelectorAll('*')) {
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height || hidden(el)) continue;
+    if (r.right > vw + 1 && !inScroller(el) && over.length < 8) over.push(`${name(el)} (sağ kenar ${Math.round(r.right)} > ${vw})`);
+    const text = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+    if (text) {
+      const fs = parseFloat(getComputedStyle(el).fontSize);
+      if (fs < 14) small.set(name(el), `${fs}px "${el.textContent.trim().slice(0, 24)}"`);
+    }
+  }
+  return {
+    pageOverflow: document.documentElement.scrollWidth - vw,
+    over,
+    small: [...small].slice(0, 6).map(([k, v]) => `${k} ${v}`)
+  };
+}
+
+async function open(page, lang, theme, route) {
+  await page.goto(`${BASE}/?lang=${lang}&theme=${theme}#/${route}`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => !document.querySelector('[aria-busy="true"]'), null, { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(300);
+}
+
+const lines = [];
+let failures = 0;
+// rehber görülmüş, ofis hesabıyla giriş yapılmış sayılır
+const office = () => { try { localStorage.setItem('wr-prefs', JSON.stringify({ chosen: true })); localStorage.setItem('wr-account', JSON.stringify({ role: 'office' })); } catch (e) {} };
+const log = (s) => { lines.push(s); console.log(s); };
+
+const browser = await chromium.launch();
+try {
+  for (const size of SIZES) {
+    if (SHOTS) await mkdir(join(OUT, size.id), { recursive: true });
+    for (const [lang, theme] of COMBOS) {
+      const ctx = await browser.newContext({ ...size.opts, colorScheme: theme });
+      // rehber ilk girişte açılır; ekran denetiminde görülmüş sayılır (rehberin kendisi ayrıca denetlenir)
+      await ctx.addInitScript(office);
+      for (const route of ROUTES) {
+        const page = await ctx.newPage();
+        const errors = [];
+        page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+        page.on('pageerror', (e) => errors.push(e.message));
+        await open(page, lang, theme, route);
+        const a = await page.evaluate(audit);
+        // Telefonda tam sayfa görüntüde sabit alt menü ortada kalıyor; telefonun gösterdiği ekran çekilir (denetim yine bütün sayfayı tarar)
+        if (SHOTS) await page.screenshot({ path: join(OUT, size.id, `${route}-${lang}-${theme}.png`), fullPage: !size.opts.isMobile });
+        const tag = `${route.padEnd(9)} ${size.id.padEnd(4)} ${lang}-${theme}`;
+        const axe = AXE ? (await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze()).violations : [];
+        const serious = axe.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+        const minor = axe.filter((v) => !serious.includes(v));
+        const bad = errors.length || a.pageOverflow > 0 || a.over.length || serious.length;
+        if (bad) failures++;
+        log(`${bad ? 'HATA' : 'tamam'}  ${tag}${a.small.length ? '  (14 px altı yazı var)' : ''}`);
+        errors.forEach((e) => log(`        konsol: ${e.slice(0, 160)}`));
+        if (a.pageOverflow > 0) log(`        sayfa ${a.pageOverflow} px yatay taşıyor`);
+        a.over.forEach((o) => log(`        taşan: ${o}`));
+        a.small.forEach((s) => log(`        küçük yazı: ${s}`));
+        for (const v of [...serious, ...minor]) {
+          log(`        erişilebilirlik (${v.impact}): ${v.id} · ${v.nodes.length} öğe · ör. ${String(v.nodes[0]?.target ?? '').slice(0, 70)}`);
+        }
+        await page.close();
+      }
+      await ctx.close();
+    }
+  }
+
+  // Telefonda teknisyen akışı, gerçek dokunmayla: yola çık → var → boş notla bitirmeyi dene → notla bitir
+  // İlk giriş rehberi: açılıyor mu, erişilebilir mi, düğmesi doğru ekranı açıyor mu
+  log('');
+  log('Rehber: ilk giriş');
+  for (const [sid, opts] of [['1440', SIZES[0].opts], ['375', SIZES[2].opts]]) for (const lang of ['en', 'tr']) {
+    const gctx = await browser.newContext({ ...opts, colorScheme: 'light' });
+    const gp = await gctx.newPage();
+    const gerr = [];
+    gp.on('pageerror', (e) => gerr.push(e.message));
+    await gp.goto(`${BASE}/?lang=${lang}&theme=light`, { waitUntil: 'networkidle' });
+    await gp.waitForTimeout(400);
+    const shown = await gp.locator('.guide').isVisible();
+    const over = await gp.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const ax = AXE ? (await new AxeBuilder({ page: gp }).include('.guide').withTags(AXE_TAGS).analyze()).violations.filter((v) => v.impact === 'serious' || v.impact === 'critical') : [];
+    if (SHOTS) await gp.screenshot({ path: join(OUT, `rehber-${sid}-${lang}.png`), fullPage: false });
+    if (SHOTS) {
+      await gp.locator('.gd-live').scrollIntoViewIfNeeded();
+      await gp.screenshot({ path: join(OUT, `rehber-canli-${sid}-${lang}.png`), fullPage: false });
+    }
+    // rehber kapanınca giriş ekranı görünür (hesap seçilmedi)
+    await gp.keyboard.press('Escape');
+    await gp.waitForTimeout(250);
+    const signin = await gp.locator('.si').isVisible();
+    const sax = AXE ? (await new AxeBuilder({ page: gp }).withTags(AXE_TAGS).analyze()).violations.filter((v) => v.impact === 'serious' || v.impact === 'critical') : [];
+    const sover = await gp.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    if (SHOTS) await gp.screenshot({ path: join(OUT, `giris-${sid}-${lang}.png`), fullPage: false });
+    await gp.evaluate(() => window.dispatchEvent(new Event('wr:guide')));
+    await gp.locator('.gd-btn').first().click();
+    await gp.waitForTimeout(300);
+    const hash = await gp.evaluate(() => location.hash);
+    const gone = !(await gp.locator('.guide').count());
+    const acct = await gp.evaluate(() => localStorage.getItem('wr-account'));
+    const bad = !shown || over > 0 || ax.length || hash !== '#/dispatch' || !gone || gerr.length || !signin || sax.length || sover > 0 || !acct?.includes('office');
+    if (bad) failures++;
+    log(`${bad ? 'HATA' : 'tamam'}  rehber ve giriş ekranı ${sid} ${lang}${!shown ? ' (görünmedi)' : ''}${over > 0 ? ' (taşma ' + over + ')' : ''}${!signin ? ' (giriş ekranı yok)' : ''}${sover > 0 ? ' (giriş taşma ' + sover + ')' : ''}${hash !== '#/dispatch' ? ' (düğme ' + hash + ' açtı)' : ''}${!gone ? ' (kapanmadı)' : ''}`);
+    sax.forEach((v) => log(`        giriş erişilebilirlik (${v.impact}): ${v.id}`));
+    ax.forEach((v) => log(`        erişilebilirlik (${v.impact}): ${v.id}`));
+    gerr.forEach((e) => log('        hata: ' + e));
+    await gctx.close();
+  }
+  log('');
+  log('Akış: telefonda teknisyen uygulaması (Gemma Hale hesabı, dokunarak)');
+  const ctx = await browser.newContext({ ...SIZES[2].opts, colorScheme: 'light' });
+  await ctx.addInitScript(() => { try { localStorage.setItem('wr-prefs', JSON.stringify({ chosen: true })); localStorage.setItem('wr-account', JSON.stringify({ role: 'engineer', eng: 'gemma' })); } catch (e) {} });
+  const page = await ctx.newPage();
+  const perr = [];
+  page.on('pageerror', (e) => perr.push(e.message));
+  const step = async (label, fn) => {
+    try {
+      await fn();
+      log(`tamam  ${label}`);
+    } catch (e) {
+      failures++;
+      log(`HATA   ${label}: ${String(e.message ?? e).split('\n')[0]}`);
+    }
+  };
+  await open(page, 'en', 'light', 'field');
+  await step('teknisyen hesabında seçim kutusu ve ofis görünümü yok', async () => {
+    if (await page.getByRole('combobox').count()) throw new Error('teknisyen seçimi görünüyor');
+    if (await page.locator('.fa-office, .rail, .tabbar').filter({ visible: true }).count()) throw new Error('ofis parçası görünüyor');
+    const head = await page.locator('.fa-head b').textContent();
+    if (head !== 'Gemma Hale') throw new Error('başlıkta ' + head);
+  });
+  await step('ofis ekranı adresi teknisyene açılmıyor', async () => {
+    await page.evaluate(() => { location.hash = '#/invoices'; });
+    await page.waitForTimeout(300);
+    const h = await page.evaluate(() => location.hash);
+    if (h !== '#/field') throw new Error('adres ' + h);
+  });
+  if (SHOTS) await page.screenshot({ path: join(OUT, 'akis-0-teknisyen-hesabi.png') });
+  await step('"On my way" düğmesine dokunma', () => page.getByRole('button', { name: 'On my way' }).tap());
+  await step('15 dakika seçimi', () => page.getByRole('radio', { name: /^15 min/ }).tap());
+  if (SHOTS) await page.screenshot({ path: join(OUT, 'akis-1-yola-cikis.png') });
+  await step('SMS gönderip yola çıkma', async () => {
+    await page.getByRole('button', { name: 'Send text and set off' }).tap();
+    await page.locator('.toast', { hasText: 'Text sent' }).waitFor({ timeout: 3000 });
+  });
+  await step('"I’ve arrived" düğmesine dokunma', async () => {
+    await page.getByRole('button', { name: 'I’ve arrived' }).tap();
+    await page.locator('.fa-timer').waitFor({ timeout: 3000 });
+  });
+  await step('boş notla bitirme reddediliyor', async () => {
+    await page.getByRole('button', { name: 'Finish job' }).tap();
+    await page.locator('.fa-form button[type=submit]').tap();
+    await page.locator('.fa-err').waitFor({ timeout: 3000 });
+  });
+  if (SHOTS) await page.screenshot({ path: join(OUT, 'akis-2-bitir.png') });
+  await step('notla bitirme ve taslak fatura', async () => {
+    await page.locator('#fa-note').fill('Old fire removed, new fire fitted and tested. Record left with the tenant.');
+    await page.locator('.fa-form button[type=submit]').tap();
+    await page.locator('.toast', { hasText: 'draft invoice' }).waitFor({ timeout: 3000 });
+    const n = await page.evaluate(() => JSON.parse(localStorage.getItem('wr:invoices.v1') ?? '[]').filter((i) => i.job === 'WR-48212').length);
+    if (n !== 1) throw new Error(`WR-48212 için ${n} fatura bulundu`);
+  });
+  await step('geri al işi ve faturayı döndürüyor', async () => {
+    await page.locator('.toast button').tap();
+    await page.locator('.fa-timer').waitFor({ timeout: 3000 });
+    const n = await page.evaluate(() => JSON.parse(localStorage.getItem('wr:invoices.v1') ?? '[]').filter((i) => i.job === 'WR-48212').length);
+    if (n !== 0) throw new Error(`geri almadan sonra ${n} fatura kaldı`);
+  });
+  await step('sayfa hatası yok', async () => { if (perr.length) throw new Error(perr.join(' | ')); });
+  await ctx.close();
+} finally {
+  await browser.close();
+}
+
+log('');
+log(failures ? `${failures} sorun bulundu.` : 'Sorun bulunmadı.');
+await mkdir(OUT, { recursive: true });
+await writeFile(join(OUT, 'rapor.txt'), lines.join('\n') + '\n', 'utf8');
+process.exitCode = failures ? 1 : 0;

@@ -1,0 +1,134 @@
+/* Whitcombe & Rudd · tasarım değişkenleri. Kaynak: ../../KIMLIK.md */
+:root {
+  /* zemin ve çizgi */
+  --canvas: #F4F4F0;
+  --surface: #FFFFFF;
+  --sunk: #FAFAF7;
+  --hover: #F6F6F2;
+  --line: #E5E5DF;
+  --line-2: #D3D3CB;
+
+  /* mürekkep */
+  --ink: #1B1B18;
+  --ink-2: #45453F;
+  --ink-3: #63635C;
+  --ink-4: #8A8A82;
+
+  /* bakır: yalnızca marka, seçim, birincil düğme, "şimdi" çizgisi */
+  --cu: #A65222;
+  --cu-ink: #8A3F18;
+  --cu-wash: #FAEFE7;
+  --cu-line: #E9C9B4;
+
+  /* durumlar: renk her zaman biçim ve yazıyla birlikte */
+  --late: #B3202E;
+  --late-wash: #FCEBEC;
+  --late-line: #F0C2C6;
+  --risk: #855400;
+  --risk-solid: #D99A00;
+  --risk-wash: #FFF3D3;
+  --risk-line: #EBD291;
+  --live: #1B5E6E;
+  --live-solid: #237386;
+  --live-wash: #E3F0F2;
+  --live-line: #BFD9DE;
+  --ok: #22683F;
+  --ok-solid: #2E8A55;
+  --ok-wash: #E6F2E9;
+
+  /* yazı */
+  --sans: "Mona Sans Variable", "Mona Sans", system-ui, sans-serif;
+  --serif: "Libre Caslon Text", Georgia, serif;
+
+  /* ölçü: 4 px temel */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  --r1: 3px;
+  --r2: 4px;
+  --r3: 6px;
+
+  --rail: 224px;
+  --rail-compact: 64px;
+  --detail: 480px;
+  --tabbar: 64px;
+
+  --shadow-float: 0 1px 2px rgba(27, 27, 24, .06), 0 12px 32px rgba(27, 27, 24, .14);
+
+  /* yardımcı yüzeyler */
+  --on-cu: #FFFFFF;
+  --cu-hover: #8A3F18;
+  --inverse: #1B1B18;
+  --on-inverse: #FFFFFF;
+  --inverse-hover: rgba(255, 255, 255, .12);
+  --cursor-row: #F1F0EA;
+  --chip: #E6E3DA;
+  --skeleton: #ECEBE5;
+  --overrun-b: #F6E3B4;
+  --preview-bg: rgba(250, 239, 231, .92);
+  --preview-bad-bg: rgba(252, 235, 236, .95);
+  --hatch: rgba(27, 27, 24, .05);
+  --nav-hover: rgba(27, 27, 24, .045);
+  --scrim: rgba(27, 27, 24, .32);
+  color-scheme: light;
+}
+
+/* Koyu tema: sıcak grafit + bakır. flouHAN sitesinin siyah + yeşilinden ayrı.
+   Kontrast oranları (yüzeyde): metin 14,6 · ikincil 10,0 · üçüncül 6,2 · durumlar 7,6–9,1 */
+:root[data-theme="dark"] {
+  --canvas: #141413;
+  --surface: #1B1B19;
+  --sunk: #171716;
+  --hover: #222220;
+  --line: #2B2B28;
+  --line-2: #3B3B37;
+
+  --ink: #ECECE6;
+  --ink-2: #C6C6BE;
+  --ink-3: #9C9C93;
+  --ink-4: #6F6F68;
+
+  --cu: #B35C2A;
+  --cu-ink: #E8A27A;
+  --cu-wash: #2A1E17;
+  --cu-line: #5C3B27;
+
+  --late: #FF8A8C;
+  --late-wash: #2E1719;
+  --late-line: #5E2A2E;
+  --risk: #E8B35A;
+  --risk-solid: #D99A00;
+  --risk-wash: #2B2310;
+  --risk-line: #5A4718;
+  --live: #7CC6D6;
+  --live-solid: #3B9DB2;
+  --live-wash: #13262A;
+  --live-line: #25505A;
+  --ok: #74C990;
+  --ok-solid: #3FA867;
+  --ok-wash: #142419;
+
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, .4), 0 14px 36px rgba(0, 0, 0, .55);
+
+  --on-cu: #FFFFFF;
+  --cu-hover: #9E4E22;
+  --inverse: #ECECE6;
+  --on-inverse: #1B1B18;
+  --inverse-hover: rgba(0, 0, 0, .08);
+  --cursor-row: #24241F;
+  --chip: #2E2E2A;
+  --skeleton: #262623;
+  --overrun-b: #4A3A12;
+  --preview-bg: rgba(42, 30, 23, .94);
+  --preview-bad-bg: rgba(46, 23, 25, .95);
+  --hatch: rgba(255, 255, 255, .05);
+  --nav-hover: rgba(255, 255, 255, .05);
+  --scrim: rgba(0, 0, 0, .55);
+  color-scheme: dark;
+}

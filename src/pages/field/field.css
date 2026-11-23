@@ -1,0 +1,137 @@
+/* Teknisyen uygulaması: solda telefon genişliğinde uygulama, sağda (geniş ekranda) ofisin gördüğü */
+
+.fa-as { display: inline-flex; align-items: center; gap: 8px; }
+.fa-as span { color: var(--ink-3); white-space: nowrap; }
+.fa-as select {
+  height: 32px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--r2);
+  background: var(--surface); color: var(--ink); font-weight: 560;
+}
+.fa-loading { display: grid; gap: 16px; padding: 24px 32px; max-width: 440px; }
+.fa-loading span { display: block; height: 96px; border-radius: var(--r3); background: var(--skeleton); }
+.fa-loading span + span { height: 280px; }
+
+.fa-wrap { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); min-height: calc(100vh - 90px); }
+.fa { border-right: 1px solid var(--line); padding-bottom: 24px; min-width: 0; }
+
+.fa-head { display: flex; flex-direction: column; gap: 2px; padding: 16px 20px 14px; border-bottom: 1px solid var(--line); }
+.fa-head b { font-weight: 620; font-size: 16px; line-height: 22px; }
+.fa-head span { color: var(--ink-2); }
+
+.fa-empty { display: flex; flex-direction: column; gap: 4px; padding: 28px 20px; }
+.fa-empty b { font-weight: 600; font-size: 16px; }
+.fa-empty p { color: var(--ink-2); }
+
+/* şu anki iş */
+.fa-cur { padding: 16px 20px 0; }
+.fa-cur-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fa-cur-top h3 { font: 600 15px/22px var(--sans); color: var(--ink-2); }
+.fa-line { margin-top: 6px; color: var(--ink-2); }
+.fa-timer { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; color: var(--ink-2); font-weight: 560; }
+.fa-bar-track { display: block; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.fa-bar-track i { display: block; height: 100%; border-radius: 2px; background: var(--live-solid); }
+.fa-timer.is-over { color: var(--risk); }
+.fa-timer.is-over .fa-bar-track i { background: var(--risk-solid); }
+.fa-title { margin-top: 12px; font: 620 20px/26px var(--sans); }
+.fa-type { margin-top: 2px; color: var(--ink-3); }
+.fa-alerts { margin: 12px 0 0; padding: 0; }
+
+.fa-cust {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 14px; padding: 12px 12px 12px 14px; border: 1px solid var(--line-2); border-radius: var(--r3);
+}
+.fa-cust div { display: flex; flex-direction: column; min-width: 0; }
+.fa-cust b { font-weight: 600; font-size: 15px; line-height: 22px; }
+.fa-cust span { color: var(--ink-2); }
+.fa-call { flex: none; height: 40px; min-width: 72px; justify-content: center; text-decoration: none; }
+
+.fa-facts { margin-top: 14px; }
+.fa-facts div { grid-template-columns: 96px minmax(0, 1fr); }
+.fa-block { margin-top: 16px; }
+.fa-block h4 { margin: 0 0 4px; font: 600 14px/20px var(--sans); color: var(--ink-2); }
+.fa-said { font-size: 15px; line-height: 22px; }
+
+.fa-parts { list-style: none; margin: 0; padding: 0; }
+.fa-parts li { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 0 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.fa-parts li:first-child { border-top: 0; padding-top: 2px; }
+.fa-code { color: var(--ink-3); }
+.fa-pstate { grid-column: 2; color: var(--ink-3); }
+.fa-parts .pstate-at_depot .fa-pstate { color: var(--risk); font-weight: 560; }
+.fa-parts .pstate-on_van .fa-pstate { color: var(--ok); font-weight: 560; }
+
+/* ana eylem: başparmak bölgesinde, kaydırırken altta sabit */
+.fa-action {
+  position: sticky; bottom: 0; z-index: 2;
+  margin: 20px -20px 0; padding: 12px 20px; border-top: 1px solid var(--line); background: var(--surface);
+}
+.fa-go { width: 100%; height: 48px; justify-content: center; font-size: 16px; font-weight: 620; }
+
+/* formlar */
+.fa-form { scroll-margin-top: 72px; margin: 20px -20px 0; padding: 16px 20px 18px; border-top: 1px solid var(--line-2); background: var(--sunk); }
+.fa-fs { margin: 0; padding: 0; border: 0; min-width: 0; }
+.fa-fs + .fa-fs, .fa-form .fa-fs:not(:first-child) { margin-top: 16px; }
+.fa-fs legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
+.fa-seg { display: flex; width: 100%; }
+.fa-seg button { flex: 1; flex-direction: column; justify-content: center; gap: 0; height: auto; min-height: 40px; padding: 6px 8px; }
+.fa-seg-sub { color: var(--ink-3); font-weight: 440; }
+.fa-label { display: block; margin-top: 16px; margin-bottom: 6px; font-weight: 600; }
+.fa-form textarea {
+  display: block; width: 100%; min-height: 84px; padding: 8px 10px; resize: vertical;
+  border: 1px solid var(--line-2); border-radius: var(--r2); background: var(--surface); font-size: 15px; line-height: 22px;
+}
+.fa-form textarea[aria-invalid="true"] { border-color: var(--late); }
+.fa-hint { margin-top: 4px; color: var(--ink-3); }
+.fa-err { margin-top: 4px; color: var(--late); font-weight: 560; }
+.fa-check { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.fa-check input { width: 20px; height: 20px; accent-color: var(--cu); }
+.fa-form-row { display: flex; gap: 8px; margin-top: 16px; }
+.fa-form-row .fa-go { flex: 1; width: auto; }
+.fa-form-row .btn-quiet { height: 48px; }
+
+/* SMS önizlemesi: telefondaki mesaj balonu gibi */
+.fa-sms { margin-top: 16px; }
+.fa-sms-k { display: block; margin-bottom: 6px; color: var(--ink-3); }
+.fa-sms p { max-width: 34ch; padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: var(--chip); font-size: 15px; line-height: 21px; }
+
+/* sonraki ve biten işler */
+.fa-sec { margin-top: 24px; padding: 0 20px; }
+.fa-sec h3 { margin-bottom: 4px; font: 600 15px/22px var(--sans); color: var(--ink-2); }
+.fa-list { list-style: none; margin: 0; padding: 0; }
+.fa-list > li { border-top: 1px solid var(--line); }
+.fa-row {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 0 8px; align-items: start;
+  width: 100%; padding: 10px 6px; margin: 0 -6px; border: 0; border-radius: var(--r2);
+  background: none; text-align: left; box-sizing: content-box;
+}
+.fa-row:hover { background: var(--hover); }
+.fa-row b { font-weight: 620; }
+.fa-row-sub { display: block; color: var(--ink-3); }
+.fa-peek { padding: 0 0 12px 60px; display: flex; flex-direction: column; gap: 4px; color: var(--ink-2); }
+.fa-peek b { color: var(--ink); font-weight: 600; }
+.fa-done > li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 0 8px; padding: 8px 0; color: var(--ink-2); }
+.fa-done .st { padding-top: 5px; }
+
+/* ofisin gördüğü */
+.fa-office { padding: 20px 32px 32px; background: var(--sunk); min-width: 0; }
+.fa-office .ov-h { font: 620 16px/22px var(--sans); }
+.fa-office-st { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 10px; }
+.fa-office-h3 { margin-top: 20px; font: 600 14px/20px var(--sans); color: var(--ink-2); }
+.fa-feed { list-style: none; margin: 6px 0 0; padding: 0; max-width: 720px; }
+.fa-feed li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 0 12px; padding: 8px 0; border-top: 1px solid var(--line); }
+.fa-feed li:first-child { border-top: 0; }
+.fa-feed-t { color: var(--ink-3); }
+.fa-feed a { color: inherit; font-weight: 600; }
+
+@media (max-width: 767px) {
+  .fa-wrap { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .fa { border-right: 0; }
+  .fa-office { display: none; }
+  .fa-action { bottom: calc(var(--tabbar) + env(safe-area-inset-bottom)); }
+  .fa-head { padding: 12px 16px; }
+  .fa-cur { padding: 14px 16px 0; }
+  .fa-action, .fa-form { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .fa-sec { padding: 0 16px; }
+  .field .page-head { flex-direction: column; align-items: stretch; gap: 10px; }
+  .field .page-actions { width: 100%; }
+  .fa-as { width: 100%; }
+  .fa-as select { flex: 1; min-width: 0; height: 40px; }
+}

@@ -1,0 +1,89 @@
+/* Faturalar: stok tablosunun ızgarasını kullanır (.slist/.srow), sütunlar burada */
+
+/* alacak yaşı: tek çubuk, altında dört dilimin adı ve tutarı */
+.ageing { padding: 4px 32px 18px; }
+.ageing-title { font: 560 14px/20px var(--sans); color: var(--ink-2); margin-bottom: 8px; }
+.ageing-bar { display: flex; gap: 2px; height: 8px; max-width: 760px; }
+.ageing-bar .ab { display: block; flex-basis: 0; min-width: 6px; border-radius: 2px; }
+.ab-0 { background: var(--ink-4); }
+.ab-1 { background: var(--risk-solid); }
+.ab-2 { background: var(--late); }
+.ab-3 { background: repeating-linear-gradient(135deg, var(--late) 0 3px, var(--late-wash) 3px 5px); }
+.ageing-keys { display: flex; flex-wrap: wrap; gap: 8px 32px; margin: 10px 0 0; }
+.ageing-keys div { display: flex; flex-direction: column; gap: 2px; }
+.ageing-keys dt { display: flex; align-items: center; gap: 6px; color: var(--ink-3); }
+.ageing-keys dt .ab { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.ageing-keys dd { margin: 0 0 0 16px; font-weight: 600; font-size: 15px; }
+.ageing-keys .is-zero dd { color: var(--ink-3); font-weight: 500; }
+
+.ilist .srow.shead { grid-template-columns: 52px 96px minmax(0, 2fr) 96px 96px 96px minmax(0, 1.4fr); }
+.ilist .sc-link { grid-template-columns: 96px minmax(0, 2fr) 96px 96px 96px minmax(0, 1.4fr); }
+.ilist .sc-name .t2 { color: var(--ink-3); }
+.ic-issued { color: var(--ink-2); }
+.ic-total { color: var(--ink-2); }
+.ic-bal { font-weight: 600; }
+.ic-bal.is-zero { color: var(--ink-4); font-weight: 440; }
+.ilist .srow.tone-late .ic-bal { color: var(--late); }
+
+/* detay */
+.plain-link { color: inherit; text-decoration: none; }
+.plain-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.inv-sum { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin-top: 14px; }
+.inv-big { font: 600 28px/34px var(--sans); letter-spacing: -0.01em; }
+.inv-why { padding: 0 20px 12px; margin-top: -6px; border-bottom: 1px solid var(--line); }
+.jd-actions:has(+ .inv-why) { border-bottom: 0; }
+
+.pay-form label { margin-top: 12px; }
+.pay-form label:first-child { margin-top: 0; }
+.pay-amount { position: relative; max-width: 180px; }
+.pay-amount span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--ink-3); }
+.pay-form .pay-amount input { padding-left: 24px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.pay-form input[aria-invalid="true"] { border-color: var(--late); }
+.pay-err { margin-top: 6px; color: var(--late); font-weight: 560; }
+.pay-methods { border: 0; margin: 12px 0 0; padding: 0; }
+.pay-methods legend { font-weight: 560; margin-bottom: 6px; padding: 0; }
+.pay-methods .seg button { height: 32px; padding: 0 12px; }
+
+/* belge: firmanın faturası Caslon başlıkla, kimlikteki gibi */
+.doc { border: 1px solid var(--line-2); border-radius: var(--r2); background: var(--sunk); padding: 14px 16px 6px; }
+.doc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--line-2); }
+.doc-firm { font: 400 17px/22px var(--serif); }
+.doc-no { color: var(--ink-3); }
+.lines { width: 100%; border-collapse: collapse; }
+.lines td, .lines th { padding: 8px 0; vertical-align: top; text-align: left; font-weight: 440; }
+.lines tbody tr + tr td { border-top: 1px solid var(--line); }
+.lines .num { text-align: right; padding-left: 16px; white-space: nowrap; }
+.lines tfoot tr:first-child th, .lines tfoot tr:first-child td { border-top: 1px solid var(--line-2); }
+.lines tfoot th { color: var(--ink-3); padding: 4px 0; }
+.lines tfoot td { padding: 4px 0 4px 16px; }
+.lines tfoot .is-total th, .lines tfoot .is-total td { color: var(--ink); font-weight: 620; padding-top: 6px; padding-bottom: 8px; }
+
+.ev-inv-paid .ev-head b, .ev-inv-payment .ev-head b { color: var(--ok); }
+.ev-inv-failed .ev-head b { color: var(--late); }
+.ev-inv-reminder .ev-head b { color: var(--risk); }
+.ev-inv-sent .ev-head b { color: var(--live); }
+
+@container (max-width: 860px) {
+  .ilist .srow.shead { grid-template-columns: 52px 92px minmax(0, 1fr) 88px 88px minmax(0, 1.2fr); }
+  .ilist .sc-link { grid-template-columns: 92px minmax(0, 1fr) 88px 88px minmax(0, 1.2fr); }
+  .ilist .shead > :nth-child(4), .ilist .ic-issued { display: none; }
+}
+
+/* orta genişlikte uzun durum ("12 gün · kısmen ödendi") sütundan taşmasın: ek bilgi durumun altına iner */
+@container (min-width: 561px) and (max-width: 1100px) {
+  .ilist .st { display: grid; grid-template-columns: 10px auto; column-gap: 7px; justify-content: start; }
+  .ilist .st-sub { grid-column: 2; white-space: normal; }
+}
+
+@container (max-width: 560px) {
+  .ilist .sc-link { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "st st" "code nums"; }
+  .ilist .ic-total, .ilist .ic-bal, .ilist .ic-issued { display: none; }
+  .ilist.no-pick .srow { grid-template-columns: 0 minmax(0, 1fr); }
+  .ilist.no-pick .sc-link { padding-left: 16px; }
+}
+
+@media (max-width: 767px) {
+  .ageing { padding: 4px 16px 14px; }
+  .ageing-keys { gap: 8px 20px; }
+  .inv-why { padding-left: 16px; padding-right: 16px; }
+}

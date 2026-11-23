@@ -1,0 +1,38 @@
+/* Durum etiketi: biçim + renk + yazı */
+.st { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-weight: 560; }
+.st-glyph { flex: none; }
+.st-sub { font-weight: 440; color: var(--ink-3); }
+.st-late { color: var(--late); }
+.st-over { color: var(--risk); }
+.st-over .st-glyph { color: var(--risk-solid); }
+.st-behind { color: var(--risk); }
+.st-live, .st-onsite { color: var(--live); }
+.st-booked { color: var(--ink-2); }
+.st-booked .st-glyph { color: var(--ink-3); }
+.st-tray { color: var(--ink-3); font-weight: 500; }
+.st-parts { color: var(--risk); }
+.st-hold { color: var(--ink-2); }
+.st-hold .st-glyph { color: var(--ink-3); }
+.st-half { color: var(--ink-2); }
+.st-half .st-glyph { color: var(--live); }
+.st-done { color: var(--ok); }
+
+.muted { color: var(--ink-3); }
+
+/* genel durum blokları: boş, sonuçsuz, hata */
+.state { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 32px; max-width: 560px; }
+.state b { font-weight: 600; font-size: 15px; }
+.state p { color: var(--ink-2); }
+.state .btn { margin-top: 8px; }
+
+.banner { margin: 12px 32px 0; padding: 10px 12px; border-radius: var(--r2); line-height: 20px; }
+.banner b { font-weight: 600; }
+.banner-warn { background: var(--risk-wash); border: 1px solid var(--risk-line); color: var(--ink); }
+
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.flip { transform: rotate(180deg); }
+
+@media (max-width: 767px) {
+  .state { padding: 24px 16px; }
+  .banner { margin: 12px 16px 0; }
+}

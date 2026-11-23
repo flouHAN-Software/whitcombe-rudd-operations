@@ -1,0 +1,16 @@
+// Uygulama ve canlı oturum sunucusu tek Worker'da. Yerelde: npm run server   Yayın: npm run deploy
+{
+  "name": "whitcombe-rudd-operations",
+  "main": "./server/index.js",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  // her canlı oturum bir Durable Object; SQLite depolama ücretsiz planda da var
+  "durable_objects": {
+    "bindings": [{ "name": "OPS_ROOM", "class_name": "OpsRoom" }]
+  },
+  "migrations": [{ "tag": "ops-v1", "new_sqlite_classes": ["OpsRoom"] }]
+}
