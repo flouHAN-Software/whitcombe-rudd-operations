@@ -79,7 +79,7 @@
   color-scheme: light;
 }
 
-/* Koyu tema: sıcak grafit + bakır. flouHAN sitesinin siyah + yeşilinden ayrı.
+/* Koyu tema: sıcak grafit + bakır. flouHAN Software sitesinin siyah + yeşilinden ayrı.
    Kontrast oranları (yüzeyde): metin 14,6 · ikincil 10,0 · üçüncül 6,2 · durumlar 7,6–9,1 */
 :root[data-theme="dark"] {
   --canvas: #141413;
