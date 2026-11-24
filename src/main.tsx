@@ -16,6 +16,7 @@ import { PrefsProvider, usePrefs } from './lib/i18n';
 import { AccountProvider, useAccount } from './lib/account';
 import { Guide } from './components/Guide';
 import { SignIn } from './components/Account';
+import { About } from './components/About';
 import { roomFromUrl } from './lib/live';
 
 // Karekodla canlı oturuma katılan cihaz (genelde telefon) ve vaka sayfasındaki "telefonda deneyin"
@@ -28,15 +29,22 @@ function Root() {
   const { account } = useAccount();
   // Rehber: ilk girişte ve menüdeki "Nasıl kullanılır" ile açılır; dil değişince kapanmaz
   const [guide, setGuide] = useState(false);
+  const [about, setAbout] = useState(false);
   useEffect(() => {
     const on = () => setGuide(true);
+    const ab = () => setAbout(true);
     window.addEventListener('wr:guide', on);
-    return () => window.removeEventListener('wr:guide', on);
+    window.addEventListener('wr:about', ab);
+    return () => {
+      window.removeEventListener('wr:guide', on);
+      window.removeEventListener('wr:about', ab);
+    };
   }, []);
   return (
     <>
       {account ? <App key={prefs.lang + account.role} /> : <SignIn key={prefs.lang} />}
       {((!prefs.chosen && !direct) || guide) && <Guide onClose={() => setGuide(false)} />}
+      {about && <About key={prefs.lang} onClose={() => setAbout(false)} />}
     </>
   );
 }

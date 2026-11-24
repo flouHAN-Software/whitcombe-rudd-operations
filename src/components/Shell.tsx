@@ -8,6 +8,7 @@ import { resetDemo } from '../lib/storage';
 import { openGuide } from './Guide';
 import { openLive } from './Live';
 import { openAccount } from './Account';
+import { Copyright, openAbout } from './About';
 import { t, usePrefs } from '../lib/i18n';
 import { shortDate } from '../data/derive';
 
@@ -130,6 +131,12 @@ export function Rail({ onSearch }: { onSearch: () => void }) {
               <span className="nav-label">{t('lv.nav')}</span>
             </button>
           </li>
+          <li>
+            <button type="button" className="nav-item nav-guide" onClick={openAbout} data-tip={t('nav.about')}>
+              <Icon name="info" />
+              <span className="nav-label">{t('nav.about')}</span>
+            </button>
+          </li>
         </ul>
       </nav>
 
@@ -149,6 +156,7 @@ export function Rail({ onSearch }: { onSearch: () => void }) {
             <small>{t('me.role')}</small>
           </span>
         </button>
+        <Copyright className="rail-copy" />
       </div>
     </aside>
   );
@@ -233,6 +241,13 @@ export function MoreSheet({ onClose }: { onClose: () => void }) {
           </button>
         </li>
         <li>
+          <button type="button" onClick={() => { onClose(); openAbout(); }}>
+            <Icon name="info" size={18} />
+            {t('nav.about')}
+            <Icon name="chevron" className="sheet-chev" />
+          </button>
+        </li>
+        <li>
           <button type="button" onClick={() => { onClose(); openAccount(); }}>
             <span className="avatar sheet-av" aria-hidden="true">EW</span>
             {t('ac.menu', { name: 'Ellie Whitcombe' })}
@@ -258,6 +273,7 @@ export function MoreSheet({ onClose }: { onClose: () => void }) {
       <p className="sheet-note">
         <b>{t('concept.bold')}</b> {t('concept.text')}
       </p>
+      <Copyright className="sheet-copy" />
     </Dialog>
   );
 }

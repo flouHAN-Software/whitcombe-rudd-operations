@@ -4,6 +4,7 @@ import { CommandMenu } from './components/CommandMenu';
 import { openGuide } from './components/Guide';
 import { LiveBar, LiveDialog, takeLive } from './components/Live';
 import { AccountDialog } from './components/Account';
+import { Copyright } from './components/About';
 import { JobsPage } from './pages/jobs/JobsPage';
 import { DispatchPage } from './pages/dispatch/DispatchPage';
 import { StockPage } from './pages/stock/StockPage';
@@ -79,6 +80,7 @@ function EngineerApp({ eng }: { eng: string }) {
       <main id="main" className="main" tabIndex={-1}>
         <LiveBar office={false} />
         <FieldPage />
+        <Copyright className="eng-copy" />
       </main>
       {/* rehber bu hesapta da açılır; canlı oturum penceresi ofis hesabına aittir */}
       {layer === 'account' && <AccountDialog onClose={close} />}
@@ -148,6 +150,7 @@ function OfficeApp() {
       <main id="main" className="main" tabIndex={-1}>
         <LiveBar />
         {route === 'today' ? <TodayPage /> : route === 'jobs' ? <JobsPage /> : route === 'dispatch' ? <DispatchPage /> : route === 'stock' ? <StockPage /> : route === 'customers' ? <CustomersPage /> : route === 'invoices' ? <InvoicesPage /> : route === 'reports' ? <ReportsPage /> : <FieldPage />}
+        <Copyright className="main-copy" />
       </main>
       <TabBar onMore={() => setLayer('more')} moreOpen={layer === 'more'} />
 

@@ -4,6 +4,7 @@ import { Icon } from './Icon';
 import { Monogram } from './Shell';
 import { LiveChecks, openLive } from './Live';
 import { enter } from './Account';
+import { openAbout } from './About';
 import { t, usePrefs } from '../lib/i18n';
 import { LIVE_ENGINEER, useAccount } from '../lib/account';
 import { go } from '../lib/router';
@@ -120,7 +121,13 @@ export function Guide({ onClose }: { onClose: () => void }) {
 
       <p className="gd-note">{t('gd.note')}</p>
       <div className="gd-foot">
-        <span className="muted">{t('gd.again')}</span>
+        <span className="gd-foot-l">
+          <span className="muted">{t('gd.again')}</span>
+          <button type="button" className="btn btn-quiet gd-about" onClick={() => { done(); openAbout(); }}>
+            <Icon name="info" size={16} />
+            {t('nav.about')}
+          </button>
+        </span>
         {account ? (
           <button type="button" className="btn btn-primary gd-go" onClick={done}>
             {t(account.role === 'engineer' ? 'gd.go.field' : 'gd.go.back')}

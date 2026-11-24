@@ -3,6 +3,7 @@ import { Dialog } from './Dialog';
 import { Icon } from './Icon';
 import { ConceptTag, Monogram, PrefControls } from './Shell';
 import { openGuide } from './Guide';
+import { Copyright, openAbout } from './About';
 import { useStore } from '../data/store';
 import { LIVE_ENGINEER, engineerOf, useAccount, type Account } from '../lib/account';
 import { t, td } from '../lib/i18n';
@@ -100,15 +101,22 @@ export function SignIn() {
         <p className="si-note">{t('si.note')}</p>
 
         <div className="si-foot">
-          <button type="button" className="btn si-guide" onClick={openGuide}>
-            <Icon name="guide" size={16} />
-            {t('nav.guide')}
-          </button>
+          <span className="si-foot-l">
+            <button type="button" className="btn si-guide" onClick={openGuide}>
+              <Icon name="guide" size={16} />
+              {t('nav.guide')}
+            </button>
+            <button type="button" className="btn btn-quiet si-guide" onClick={openAbout}>
+              <Icon name="info" size={16} />
+              {t('nav.about')}
+            </button>
+          </span>
           <PrefControls />
         </div>
         <p className="si-concept">
           <ConceptTag /> <span>{t('concept.text')}</span>
         </p>
+        <Copyright className="si-copy" />
       </main>
     </div>
   );
@@ -161,10 +169,16 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
       <p className="lv-small">{t('si.note')}</p>
       {/* teknisyen kabuğunda sol menü yok: dil, tema ve rehber buradan */}
       <div className="ac-prefs">
-        <button type="button" className="btn btn-quiet" onClick={() => { onClose(); openGuide(); }}>
-          <Icon name="guide" size={16} />
-          {t('nav.guide')}
-        </button>
+        <span className="ac-prefs-l">
+          <button type="button" className="btn btn-quiet" onClick={() => { onClose(); openGuide(); }}>
+            <Icon name="guide" size={16} />
+            {t('nav.guide')}
+          </button>
+          <button type="button" className="btn btn-quiet" onClick={() => { onClose(); openAbout(); }}>
+            <Icon name="info" size={16} />
+            {t('nav.about')}
+          </button>
+        </span>
         <PrefControls />
       </div>
     </Dialog>

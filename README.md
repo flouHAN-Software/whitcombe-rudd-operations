@@ -19,7 +19,7 @@ It is 10:34 on a Monday and the clock keeps running. Ten engineers are out (the 
 
 There are two kinds of account. The office sees every screen. An engineer sees only their own day, and office routes send them back to it. The demo accounts have no password: the sign-in screen just picks a person.
 
-The interface is in English and Turkish, with a light and a dark theme. A short guide opens on the first visit.
+The interface is in English and Turkish, with a light and a dark theme. A short guide opens on the first visit, and an "About this project" screen lists what was built, with which tools, and what the same structure can be used for.
 
 ![Dispatch: a job being dragged from the tray](docs/dispatch.webp)
 
@@ -78,4 +78,4 @@ Comments in the source are written in Turkish.
 
 ## Licence
 
-© 2026 flouHAN Software. The code is published to be read and reviewed. It is not licensed for reuse.
+© 2026 flouHAN Software. All rights reserved. The design and source code are published to be read and reviewed; they may not be copied, changed or used without written permission. See [LICENSE](LICENSE).

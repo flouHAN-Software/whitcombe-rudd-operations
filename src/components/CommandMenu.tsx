@@ -6,6 +6,7 @@ import { go } from '../lib/router';
 import { resetDemo } from '../lib/storage';
 import { t, usePrefs } from '../lib/i18n';
 import { openLive } from './Live';
+import { openAbout } from './About';
 
 interface Cmd {
   id: string;
@@ -37,6 +38,7 @@ export function CommandMenu({ onClose, onHelp }: { onClose: () => void; onHelp: 
       })),
       { id: 'help', group: 'act', label: t('nav.guide'), icon: 'guide', words: 'help guide how rehber yardım nasıl', run: onHelp },
       { id: 'live', group: 'act', label: t('lv.nav'), icon: 'live', words: 'live phone qr session canlı telefon karekod oturum', run: openLive },
+      { id: 'about', group: 'act', label: t('nav.about'), icon: 'info', words: 'about project licence license code github hakkında proje lisans kaynak kod', run: openAbout },
       { id: 'lang', group: 'act', label: t('lang.other'), icon: 'keyboard', words: 'language dil english türkçe turkish ingilizce', run: () => set({ lang: prefs.lang === 'en' ? 'tr' : 'en' }) },
       { id: 'theme', group: 'act', label: dark ? t('theme.toLight') : t('theme.toDark'), icon: dark ? 'sun' : 'moon', words: 'theme tema dark light koyu açık', run: () => set({ theme: dark ? 'light' : 'dark' }) },
       {

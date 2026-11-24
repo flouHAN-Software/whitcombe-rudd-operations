@@ -160,6 +160,54 @@ try {
     gerr.forEach((e) => log('        hata: ' + e));
     await gctx.close();
   }
+  // Telif satırı her kabukta en altta görünür; "Bu proje hakkında" menüden açılır
+  log('');
+  log('Telif satırı ve "Bu proje hakkında"');
+  const COPY = { en: '© 2026 flouHAN Software. All rights reserved.', tr: '© 2026 flouHAN Software. Tüm hakları saklıdır.' };
+  const visibleCopy = (p) => p.evaluate(() => [...document.querySelectorAll('.copy')].filter((e) => e.getClientRects().length && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden').map((e) => e.textContent));
+  for (const [sid, opts] of SIZES.map((x) => [x.id, x.opts])) for (const lang of ['en', 'tr']) {
+    const actx = await browser.newContext({ ...opts, colorScheme: 'light' });
+    // rehber görülmüş sayılır; hesap yalnızca ilk açılışta adresle verilir (sonra giriş ekranı ve teknisyen denenir)
+    await actx.addInitScript(() => { try { localStorage.setItem('wr-prefs', JSON.stringify({ chosen: true })); } catch (e) {} });
+    const ap = await actx.newPage();
+    const aerr = [];
+    ap.on('pageerror', (e) => aerr.push(e.message));
+    await ap.goto(`${BASE}/?as=office&lang=${lang}&theme=light#/today`, { waitUntil: 'networkidle' });
+    await ap.waitForTimeout(300);
+    // ofis kabuğu: masaüstünde menüde, orta genişlikte sayfa sonunda, telefonda "Diğer"de
+    if (opts.isMobile) await ap.locator('.tabbar .tab').last().tap();
+    const shown = await visibleCopy(ap);
+    const copyOk = shown.includes(COPY[lang]);
+    // pencere: masaüstünde menüden, telefonda "Diğer"den
+    if (opts.isMobile) await ap.locator('.sheet-list button', { hasText: lang === 'tr' ? 'Bu proje hakkında' : 'About this project' }).tap();
+    else await ap.locator('.rail .nav-item', { hasText: lang === 'tr' ? 'Bu proje hakkında' : 'About this project' }).click();
+    await ap.locator('.about').waitFor({ timeout: 3000 });
+    const info = await ap.evaluate(() => ({
+      over: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      repo: !!document.querySelector('.about a[href="https://github.com/flouHAN-Software/whitcombe-rudd-operations"]'),
+      secs: document.querySelectorAll('.about .gd-sec').length
+    }));
+    const ax = AXE ? (await new AxeBuilder({ page: ap }).include('.about').withTags(AXE_TAGS).analyze()).violations.filter((v) => v.impact === 'serious' || v.impact === 'critical') : [];
+    if (SHOTS) await ap.locator('.about').screenshot({ path: join(OUT, `hakkinda-${sid}-${lang}.png`) });
+    await ap.keyboard.press('Escape');
+    const closed = !(await ap.locator('.about').count());
+    // giriş ekranı ve teknisyen kabuğu
+    // aynı adrese gitmek sayfayı yeniden yüklemez: önce boş sayfaya çıkılır
+    await ap.evaluate(() => { localStorage.removeItem('wr-account'); });
+    await ap.goto('about:blank');
+    await open(ap, lang, 'light', 'today');
+    const signCopy = (await ap.locator('.si').count()) > 0 && (await visibleCopy(ap)).includes(COPY[lang]);
+    await ap.evaluate(() => { localStorage.setItem('wr-account', JSON.stringify({ role: 'engineer', eng: 'gemma' })); });
+    await ap.goto('about:blank');
+    await open(ap, lang, 'light', 'field');
+    const engCopy = (await ap.locator('.app-eng').count()) > 0 && (await visibleCopy(ap)).includes(COPY[lang]);
+    const bad = !copyOk || !signCopy || !engCopy || !info.repo || info.secs !== 5 || info.over > 0 || ax.length || !closed || aerr.length;
+    if (bad) failures++;
+    log(`${bad ? 'HATA' : 'tamam'}  telif ve hakkında ${sid} ${lang}${!copyOk ? ' (ofiste telif yok)' : ''}${!signCopy ? ' (girişte telif yok)' : ''}${!engCopy ? ' (teknisyende telif yok)' : ''}${!info.repo ? ' (depo bağlantısı yok)' : ''}${info.secs !== 5 ? ' (' + info.secs + ' bölüm)' : ''}${info.over > 0 ? ' (taşma ' + info.over + ')' : ''}${!closed ? ' (Esc kapatmadı)' : ''}`);
+    ax.forEach((v) => log(`        erişilebilirlik (${v.impact}): ${v.id}`));
+    aerr.forEach((e) => log('        hata: ' + e));
+    await actx.close();
+  }
   log('');
   log('Akış: telefonda teknisyen uygulaması (Gemma Hale hesabı, dokunarak)');
   const ctx = await browser.newContext({ ...SIZES[2].opts, colorScheme: 'light' });
