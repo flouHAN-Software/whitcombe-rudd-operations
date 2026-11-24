@@ -21,7 +21,10 @@ import { roomFromUrl } from './lib/live';
 
 // Karekodla canlı oturuma katılan cihaz (genelde telefon) ve vaka sayfasındaki "telefonda deneyin"
 // bağlantısıyla gelen ziyaretçi rehbersiz, doğrudan işe başlar
-const direct = roomFromUrl() !== null || new URLSearchParams(location.search).has('live');
+// Vaka sayfasındaki 'Beceriler' bağlantısı (#/about): 'Bu proje hakkında' penceresi doğrudan açılır, adres Bugün'e döner
+const aboutLink = location.hash === '#/about';
+if (aboutLink) history.replaceState(null, '', location.pathname + location.search + '#/today');
+const direct = roomFromUrl() !== null || new URLSearchParams(location.search).has('live') || aboutLink;
 
 // Dil değişince uygulama yeniden kurulur (bütün metinler yeni dilde hesaplanır); veri yerinde kalır
 function Root() {
@@ -29,7 +32,7 @@ function Root() {
   const { account } = useAccount();
   // Rehber: ilk girişte ve menüdeki "Nasıl kullanılır" ile açılır; dil değişince kapanmaz
   const [guide, setGuide] = useState(false);
-  const [about, setAbout] = useState(false);
+  const [about, setAbout] = useState(aboutLink);
   useEffect(() => {
     const on = () => setGuide(true);
     const ab = () => setAbout(true);
