@@ -1,0 +1,54 @@
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Type check and build
+        run: npm run build
+
+      - name: Screens, accessibility and the engineer flow
+        run: |
+          npx vite --port 5190 --strictPort > vite.log 2>&1 &
+          for i in $(seq 1 40); do curl -sf http://localhost:5190/ > /dev/null && break; sleep 1; done
+          npm run check -- --no-shots
+
+      - name: Live session on two devices
+        run: |
+          npx --yes wrangler@4.166.0 dev --port 8787 --ip 127.0.0.1 > wrangler.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:8787/ > /dev/null && break; sleep 1; done
+          BASE=http://127.0.0.1:8787 npm run live-check
+
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: check-report
+          path: |
+            output/checks/rapor.txt
+            vite.log
+            wrangler.log
+          if-no-files-found: ignore
