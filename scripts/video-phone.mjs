@@ -1,6 +1,6 @@
 // Telefon için dikey tanıtım videosu (1080×1920): demo telefon ekranında, dokunarak kullanılır.
 // Vaka sayfası telefonda açılınca masaüstü videosu yerine bu oynar (yazılar telefonda da okunur).
-// Akış: giriş ekranı → Gemma Hale olarak yola çık, var, işi bitir → ofis hesabına geç → Bugün ve Faturalar.
+// Akış: ofis ekranı ve karşılama kartı → kartla Gemma Hale olarak gir → yola çık, var, işi bitir → ofis hesabına geç → Bugün ve Faturalar.
 // Kullanım (sunucu açıkken: `npm run server`):
 //   npm run video-phone -- en   →  output/tanitim-telefon-en.mp4 ve .jpg
 //   npm run video-phone -- tr   →  output/tanitim-telefon-tr.mp4 ve .jpg
@@ -22,8 +22,8 @@ const L = {
     office: 'Switch to the office account', more: 'More', invoices: 'Invoices', toSend: /^To send/,
     note: 'Old fire removed, new fire fitted and tested.',
     c: [
-      'Two accounts. The office sees every screen; an engineer sees only their own day.',
-      'Gemma’s next job: access notes, the contact and the part already on her van.',
+      'The office dashboard on a phone, with a short note on what to try first.',
+      'Two accounts: an engineer sees only their own day. This is Gemma’s next job.',
       'Before she sets off, she sees the exact text the tenant will get.',
       'On site the clock runs. She finishes the job with a short note.',
       'Finishing the job drafts its invoice for the office.',
@@ -37,8 +37,8 @@ const L = {
     office: 'Ofis hesabına geç', more: 'Diğer', invoices: 'Faturalar', toSend: /^Gönderilecek/,
     note: 'Old fire removed, new fire fitted and tested.',
     c: [
-      'İki hesap var. Ofis bütün ekranları görür; teknisyen yalnızca kendi gününü.',
-      'Gemma’nın sıradaki işi: giriş notları, irtibat kişisi ve araçtaki parça.',
+      'Ofis paneli telefonda; kısa bir not önce neyin deneneceğini söyler.',
+      'İki hesap var: teknisyen yalnızca kendi gününü görür. Bu, Gemma’nın sıradaki işi.',
       'Yola çıkmadan önce kiracıya gidecek mesajı olduğu gibi görür.',
       'Sahada süre işler. İşi kısa bir notla bitirir.',
       'İş bitince faturası ofis için kendiliğinden hazırlanır.',
@@ -52,8 +52,7 @@ const L = {
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: DPR, isMobile: true, hasTouch: true, colorScheme: 'light' });
 await ctx.addInitScript(overlay, true);
-// rehber görülmüş sayılır: video giriş ekranıyla açılır
-await ctx.addInitScript(() => { try { localStorage.setItem('wr-prefs', JSON.stringify({ chosen: true })); } catch (e) { /* */ } });
+// hiç ziyaret edilmemiş tarayıcı: video doğrudan ofis ekranı ve karşılama kartıyla açılır
 const page = await ctx.newPage();
 const pause = (ms) => page.waitForTimeout(ms);
 const cap = (step, text, pos) => page.evaluate(([s, t, p]) => window.__cap?.(s, t, p), [step, text, pos]);
@@ -71,14 +70,14 @@ const scroll = (y) => page.evaluate((top) => window.scrollBy({ top, behavior: 's
 
 await page.goto(`${BASE}/?lang=${LANG}&theme=light`, { waitUntil: 'networkidle' });
 await page.evaluate(() => document.fonts.ready);
-await page.locator('.si-acc').nth(1).waitFor();
+await page.locator('.wc').waitFor();
 await pause(400);
 const rec = await record(ctx, page, TMP, { maxWidth: VW * DPR, maxHeight: VH * DPR });
 
-// 1. Giriş ekranı
-await cap('1', L.c[0], 'low');
-await pause(3200);
-await tap(page.locator('.si-acc').nth(1), 900);
+// 1. Ofis ekranı ve karşılama kartı; kartla teknisyen hesabına geçilir
+await cap('1', L.c[0]);
+await pause(3000);
+await tap(page.locator('.wc-foot .btn').nth(1), 900);
 
 // 2. Gemma'nın sıradaki işi
 await cap('2', L.c[1]);

@@ -19,13 +19,13 @@ const TMP = fileURLToPath(new URL(`../output/checks/video-${LANG}/`, import.meta
 // Ekrandaki düğme adları ve altyazılar (iki dil ayrı yazıldı)
 const L = {
   en: {
-    start: 'Sign in as the office', dispatch: 'Dispatch', field: 'Engineer app', invoices: 'Invoices', reports: 'Reports',
+    dispatch: 'Dispatch', field: 'Engineer app', invoices: 'Invoices', reports: 'Reports',
     live: 'Try it on your phone', session: 'Start a session', way: 'On my way', min15: /^15 min/, send: 'Send text and set off',
     arrived: 'I’ve arrived', finish: 'Finish job', toSend: /^To send/,
     note: 'Old fire removed, new fire fitted and tested. Record left with the tenant.',
     c: [
       'An operations dashboard for a firm that services boilers, appliances and air conditioning.',
-      'The first visit opens a short guide: what each screen is for, what to try first, and what the two-device test shows.',
+      'The demo opens on the dashboard itself. A short note says what to try first; the full guide is a click away.',
       'Today: what needs attention right now, and how the day is going against the plan.',
       'Dispatch: drag a waiting job onto an engineer’s day. The window promised to the customer lights up.',
       'The engineer’s screen: set off, arrive, finish. The text to the tenant is shown before it goes.',
@@ -38,13 +38,13 @@ const L = {
     ]
   },
   tr: {
-    start: 'Ofis olarak başla', dispatch: 'Planlama', field: 'Teknisyen uygulaması', invoices: 'Faturalar', reports: 'Raporlar',
+    dispatch: 'Planlama', field: 'Teknisyen uygulaması', invoices: 'Faturalar', reports: 'Raporlar',
     live: 'Telefonda canlı dene', session: 'Oturumu başlat', way: 'Yola çıkıyorum', min15: /^15 dk/, send: 'SMS’i gönder, yola çık',
     arrived: 'Vardım', finish: 'İşi bitir', toSend: /^Gönderilecek/,
     note: 'Old fire removed, new fire fitted and tested. Record left with the tenant.',
     c: [
       'Kombi, beyaz eşya ve klima servisi veren bir firmanın operasyon paneli.',
-      'İlk girişte kısa bir rehber açılır: hangi ekran ne işe yarar, önce ne denenmeli, iki cihazla deneme neyi gösterir.',
+      'Demo doğrudan panelle açılır. Kısa bir not önce neyin deneneceğini söyler; tam rehber bir tık uzakta.',
       'Bugün: o an ilgilenilmesi gerekenler ve günün plana göre gidişi.',
       'Planlama: bekleyen bir işi teknisyenin gününe sürükleyin. Müşteriye söz verilen saat aralığı işaretlenir.',
       'Teknisyen ekranı: yola çık, var, işi bitir. Kiracıya gidecek mesaj gönderilmeden önce görünür.',
@@ -84,21 +84,19 @@ async function click(loc, opts) {
 const rail = (name) => page.locator('.rail .nav-item', { hasText: name }).first();
 
 await page.goto(`${BASE}/?lang=${LANG}&theme=light`, { waitUntil: 'networkidle' });
+await page.locator('.wc').waitFor();
 await page.evaluate(() => document.fonts.ready);
 await pause(400);
 const rec = await record(ctx, page, TMP, { maxWidth: W, maxHeight: H });
 await page.mouse.move(mx, my);
 
-// 1. Rehber ve ofis hesabıyla giriş
+// 1. İlk kareden ürün: ofis ekranı ve karşılama kartı; kart kapatılır
 await cap('', L.c[0]);
-await pause(2800);
+await pause(2600);
 await cap('1', L.c[1]);
-await moveTo(page.locator('.gd-screens'), { steps: 30 });
-await page.mouse.wheel(0, 260);
-await pause(1600);
-await moveTo(page.locator('.gd-live .lc'), { steps: 26 });
-await pause(2000);
-await click(page.getByRole('button', { name: L.start }), { steps: 30 });
+await moveTo(page.locator('.wc-try'), { steps: 30, dx: -40 });
+await pause(2200);
+await click(page.locator('.wc-x'), { steps: 20 });
 await pause(600);
 
 // 2. Bugün
