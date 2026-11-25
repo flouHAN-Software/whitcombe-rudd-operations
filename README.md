@@ -21,7 +21,7 @@ It is 10:34 on a Monday and the clock keeps running. Ten engineers are out (the 
 
 There are two kinds of account. The office sees every screen. An engineer sees only their own day, and office routes send them back to it. The demo accounts have no password: the sign-in screen just picks a person.
 
-The interface is in English and Turkish, with a light and a dark theme. The demo opens on the office dashboard with a small welcome card that says what to try first; a full guide covers every screen, and an "About this project" screen lists what was built, with which tools, and what the same structure can be used for.
+The interface is in English and Turkish, with a light and a dark theme. Records (job titles, notes, part names, invoice lines, history) are kept in English and shown in Turkish when the interface is Turkish ([`src/data/records-tr.ts`](src/data/records-tr.ts)), so the two devices in a live session can use different languages on the same data. Names, streets, models and £ amounts stay as they are. The demo opens on the office dashboard with a small welcome card that says what to try first; a full guide covers every screen, and an "About this project" screen lists what was built, with which tools, and what the same structure can be used for.
 
 ![Dispatch: a job being dragged from the tray](docs/dispatch.webp)
 
@@ -67,7 +67,7 @@ Screenshots, reports and videos are written to `output/`. On every push, GitHub 
 src/
   App.tsx          office and engineer shells, role guard
   components/      shell, guide, sign-in and account, live session dialog
-  data/            seed data (loaded as its own chunk), store, derived figures
+  data/            seed data and its Turkish wording (loaded as their own chunk), store, derived figures
   lib/             i18n, routing, demo clock, live session client, accounts
   pages/           one folder per screen
 server/            Cloudflare Worker and the Durable Object
