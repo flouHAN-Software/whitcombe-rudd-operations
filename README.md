@@ -1,5 +1,7 @@
 # Whitcombe & Rudd · operations dashboard
 
+[![Checks](https://github.com/flouHAN-Software/whitcombe-rudd-operations/actions/workflows/checks.yml/badge.svg)](https://github.com/flouHAN-Software/whitcombe-rudd-operations/actions/workflows/checks.yml)
+
 A concept web app by [flouHAN Software](https://flouhan.com): the office system and the engineers' phone app for a firm that services boilers, appliances and air conditioning. The firm, its people and its data are made up.
 
 - **Live demo:** https://flouhan.com/demo/operasyon-paneli/
@@ -19,7 +21,7 @@ It is 10:34 on a Monday and the clock keeps running. Ten engineers are out (the 
 
 There are two kinds of account. The office sees every screen. An engineer sees only their own day, and office routes send them back to it. The demo accounts have no password: the sign-in screen just picks a person.
 
-The interface is in English and Turkish, with a light and a dark theme. A short guide opens on the first visit, and an "About this project" screen lists what was built, with which tools, and what the same structure can be used for.
+The interface is in English and Turkish, with a light and a dark theme. The demo opens on the office dashboard with a small welcome card that says what to try first; a full guide covers every screen, and an "About this project" screen lists what was built, with which tools, and what the same structure can be used for.
 
 ![Dispatch: a job being dragged from the tray](docs/dispatch.webp)
 
@@ -57,7 +59,7 @@ npm run live-check       # two browsers, office and phone, through the live-sess
 npm run video -- en      # records the walkthrough from the running demo; video-phone for the phone cut
 ```
 
-Screenshots, reports and videos are written to `output/`.
+Screenshots, reports and videos are written to `output/`. On every push, GitHub Actions runs the screen checks and the two-browser live-session test ([`.github/workflows/checks.yml`](.github/workflows/checks.yml)).
 
 ## Layout
 
@@ -72,7 +74,7 @@ server/            Cloudflare Worker and the Durable Object
 scripts/           Playwright checks and video recording
 ```
 
-Comments in the source are written in Turkish.
+The server, the live-session client, the data store, accounts and the app shell are commented in English. Some screen files still carry Turkish comments.
 
 ![Reports](docs/reports.webp)
 
