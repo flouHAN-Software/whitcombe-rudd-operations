@@ -123,40 +123,53 @@ try {
   // Telefonda teknisyen akışı, gerçek dokunmayla: yola çık → var → boş notla bitirmeyi dene → notla bitir
   // İlk giriş rehberi: açılıyor mu, erişilebilir mi, düğmesi doğru ekranı açıyor mu
   log('');
-  log('Rehber: ilk giriş');
+  log('İlk giriş: karşılama kartı, rehber ve giriş ekranı');
   for (const [sid, opts] of [['1440', SIZES[0].opts], ['375', SIZES[2].opts]]) for (const lang of ['en', 'tr']) {
     const gctx = await browser.newContext({ ...opts, colorScheme: 'light' });
     const gp = await gctx.newPage();
     const gerr = [];
     gp.on('pageerror', (e) => gerr.push(e.message));
+    const over = () => gp.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const axe = async (sel) => (AXE ? (await (sel ? new AxeBuilder({ page: gp }).include(sel) : new AxeBuilder({ page: gp })).withTags(AXE_TAGS).analyze()).violations.filter((v) => v.impact === 'serious' || v.impact === 'critical') : []);
+    // hiç ziyaret edilmemiş tarayıcı: ürün (ofis ekranı) hemen görünür, üstünde küçük karşılama kartı
     await gp.goto(`${BASE}/?lang=${lang}&theme=light`, { waitUntil: 'networkidle' });
-    await gp.waitForTimeout(400);
-    const shown = await gp.locator('.guide').isVisible();
-    const over = await gp.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    const ax = AXE ? (await new AxeBuilder({ page: gp }).include('.guide').withTags(AXE_TAGS).analyze()).violations.filter((v) => v.impact === 'serious' || v.impact === 'critical') : [];
-    if (SHOTS) await gp.screenshot({ path: join(OUT, `rehber-${sid}-${lang}.png`), fullPage: false });
+    await gp.waitForTimeout(500);
+    const card = await gp.locator('.wc').isVisible();
+    const product = await gp.locator(opts.isMobile ? '.mtop' : '.rail').isVisible();
+    const gate = await gp.locator('.guide, .si').count();
+    const wover = await over();
+    const wax = await axe('.wc');
+    if (SHOTS) await gp.screenshot({ path: join(OUT, `karsilama-${sid}-${lang}.png`), fullPage: false });
+    // ilk deneme düğmesi: Planlama açılır, kart kapanır ve bir daha açılmaz
+    await gp.locator('.wc-try button').first().click();
+    await gp.waitForTimeout(300);
+    const hash = await gp.evaluate(() => location.hash);
+    const cardGone = !(await gp.locator('.wc').count());
+    // tam rehber: her ekranın ne işe yaradığı ve iki cihazla deneme
+    await gp.evaluate(() => window.dispatchEvent(new Event('wr:guide')));
+    await gp.locator('.guide').waitFor({ timeout: 3000 });
+    const gax = await axe('.guide');
     if (SHOTS) {
       await gp.locator('.gd-live').scrollIntoViewIfNeeded();
       await gp.screenshot({ path: join(OUT, `rehber-canli-${sid}-${lang}.png`), fullPage: false });
     }
-    // rehber kapanınca giriş ekranı görünür (hesap seçilmedi)
     await gp.keyboard.press('Escape');
     await gp.waitForTimeout(250);
+    const guideGone = !(await gp.locator('.guide').count());
+    // daha önce gelmiş ve çıkış yapmış ziyaretçi giriş ekranını görür
+    await gp.evaluate(() => localStorage.removeItem('wr-account'));
+    await gp.goto('about:blank');
+    await gp.goto(`${BASE}/?lang=${lang}&theme=light`, { waitUntil: 'networkidle' });
+    await gp.waitForTimeout(400);
     const signin = await gp.locator('.si').isVisible();
-    const sax = AXE ? (await new AxeBuilder({ page: gp }).withTags(AXE_TAGS).analyze()).violations.filter((v) => v.impact === 'serious' || v.impact === 'critical') : [];
-    const sover = await gp.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    const noCard = !(await gp.locator('.wc').count());
+    const sax = await axe(null);
+    const sover = await over();
     if (SHOTS) await gp.screenshot({ path: join(OUT, `giris-${sid}-${lang}.png`), fullPage: false });
-    await gp.evaluate(() => window.dispatchEvent(new Event('wr:guide')));
-    await gp.locator('.gd-btn').first().click();
-    await gp.waitForTimeout(300);
-    const hash = await gp.evaluate(() => location.hash);
-    const gone = !(await gp.locator('.guide').count());
-    const acct = await gp.evaluate(() => localStorage.getItem('wr-account'));
-    const bad = !shown || over > 0 || ax.length || hash !== '#/dispatch' || !gone || gerr.length || !signin || sax.length || sover > 0 || !acct?.includes('office');
+    const bad = !card || !product || gate || wover > 0 || wax.length || hash !== '#/dispatch' || !cardGone || gax.length || !guideGone || !signin || !noCard || sax.length || sover > 0 || gerr.length;
     if (bad) failures++;
-    log(`${bad ? 'HATA' : 'tamam'}  rehber ve giriş ekranı ${sid} ${lang}${!shown ? ' (görünmedi)' : ''}${over > 0 ? ' (taşma ' + over + ')' : ''}${!signin ? ' (giriş ekranı yok)' : ''}${sover > 0 ? ' (giriş taşma ' + sover + ')' : ''}${hash !== '#/dispatch' ? ' (düğme ' + hash + ' açtı)' : ''}${!gone ? ' (kapanmadı)' : ''}`);
-    sax.forEach((v) => log(`        giriş erişilebilirlik (${v.impact}): ${v.id}`));
-    ax.forEach((v) => log(`        erişilebilirlik (${v.impact}): ${v.id}`));
+    log(`${bad ? 'HATA' : 'tamam'}  ilk giriş ${sid} ${lang}${!card ? ' (kart yok)' : ''}${!product ? ' (ürün görünmüyor)' : ''}${gate ? ' (rehber ya da giriş ekranı önde)' : ''}${wover > 0 ? ' (taşma ' + wover + ')' : ''}${hash !== '#/dispatch' ? ' (düğme ' + hash + ' açtı)' : ''}${!cardGone ? ' (kart kapanmadı)' : ''}${!guideGone ? ' (rehber kapanmadı)' : ''}${!signin ? ' (giriş ekranı yok)' : ''}${!noCard ? ' (girişte kart var)' : ''}${sover > 0 ? ' (giriş taşma ' + sover + ')' : ''}`);
+    [['kart', wax], ['rehber', gax], ['giriş', sax]].forEach(([n, list]) => list.forEach((v) => log(`        ${n} erişilebilirlik (${v.impact}): ${v.id}`)));
     gerr.forEach((e) => log('        hata: ' + e));
     await gctx.close();
   }

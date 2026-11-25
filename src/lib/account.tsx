@@ -1,15 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
-// Demo hesapları ve rol yetkisi. Parola yok: giriş ekranında kişi seçilir.
-// Ofis (Ellie Whitcombe) bütün ekranları görür; teknisyen yalnızca kendi gününü (teknisyen uygulaması).
-// Gerçek bir kurulumda aynı roller firmanın kendi girişine (e-posta + parola, Google ya da Microsoft) bağlanır.
+// Demo accounts and role permissions. There is no password: the sign-in screen just picks a person.
+// The office (Ellie Whitcombe) sees every screen; an engineer sees only their own day (the engineer app).
+// In a real installation the same roles sit behind the firm's own sign-in (email and password, Google or Microsoft).
 
 export type Account = { role: 'office' } | { role: 'engineer'; eng: string };
 
-/** Canlı oturumda telefonun açıldığı teknisyen: 10:34'te sıradaki işi (WR-48212, 11:00) bekliyor */
+/** The engineer the phone opens as in a live session: at 10:34 her next job (WR-48212, 11:00) is still to come */
 export const LIVE_ENGINEER = 'gemma';
 
-// "wr:" önekiyle saklanmaz: "Demo verisini sıfırla" oturumu kapatmasın
+// Not stored under the "wr:" prefix, so "Reset demo data" does not sign anyone out
 const KEY = 'wr-account';
 const ENG = /^[a-z]{2,12}$/;
 
@@ -21,7 +21,7 @@ function parse(v: unknown): Account | null {
   return null;
 }
 
-/** ?as=office ya da ?as=<teknisyen>: canlı oturum bağlantısı ve vaka sayfası hesabı belirler; adresten silinir */
+/** ?as=office or ?as=<engineer>: the live-session link and the case page pick the account; the parameter is then removed */
 function fromUrl(): Account | null {
   try {
     const u = new URL(location.href);
@@ -40,9 +40,14 @@ function read(): Account | null {
   const q = fromUrl();
   if (q) return q;
   try {
-    return parse(JSON.parse(localStorage.getItem(KEY) || 'null'));
+    const saved = parse(JSON.parse(localStorage.getItem(KEY) || 'null'));
+    if (saved) return saved;
+    // First visit: straight into the office view, no sign-in gate. The welcome card offers the engineer account.
+    // Someone who has been here before and signed out sees the sign-in screen instead.
+    const prefs = JSON.parse(localStorage.getItem('wr-prefs') || '{}');
+    return prefs && prefs.chosen === true ? null : { role: 'office' };
   } catch {
-    return null;
+    return { role: 'office' };
   }
 }
 
@@ -60,7 +65,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       if (account) localStorage.setItem(KEY, JSON.stringify(account));
       else localStorage.removeItem(KEY);
     } catch {
-      /* depolama kapalı: hesap yalnızca bu sekmede geçerli */
+      /* storage is blocked: the account lasts for this tab only */
     }
   }, [account]);
   const signIn = useCallback((a: Account) => setAccount(a), []);
@@ -70,9 +75,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
 
 export function useAccount() {
   const c = useContext(C);
-  if (!c) throw new Error('AccountProvider eksik');
+  if (!c) throw new Error('AccountProvider is missing');
   return c;
 }
 
-/** Teknisyen hesabıysa teknisyenin kimliği, değilse null */
+/** The engineer's id for an engineer account, otherwise null */
 export const engineerOf = (a: Account | null) => (a?.role === 'engineer' ? a.eng : null);
