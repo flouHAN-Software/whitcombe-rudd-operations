@@ -35,7 +35,7 @@ const L = {
   tr: {
     way: 'Yola çıkıyorum', min15: /^15 dk/, send: 'SMS’i gönder, yola çık', arrived: 'Vardım', finish: 'İşi bitir',
     office: 'Ofis hesabına geç', more: 'Diğer', invoices: 'Faturalar', toSend: /^Gönderilecek/,
-    note: 'Old fire removed, new fire fitted and tested.',
+    note: 'Eski şömine söküldü, yenisi takılıp denendi.',
     c: [
       'Ofis paneli telefonda; kısa bir not önce neyin deneneceğini söyler.',
       'İki hesap var: teknisyen yalnızca kendi gününü görür. Bu, Gemma’nın sıradaki işi.',
@@ -77,19 +77,19 @@ const rec = await record(ctx, page, TMP, { maxWidth: VW * DPR, maxHeight: VH * D
 // 1. Ofis ekranı ve karşılama kartı; kartla teknisyen hesabına geçilir
 await cap('1', L.c[0]);
 await pause(3000);
-await tap(page.locator('.wc-foot .btn').nth(1), 900);
 
 // 2. Gemma'nın sıradaki işi
+// Ekran değişen adımlarda altyazı dokunuştan hemen önce gelir: izleyen, olacak şeyi okurken görür
 await cap('2', L.c[1]);
-await pause(1200);
+await tap(page.locator('.wc-foot .btn').nth(1), 1950);
 await scroll(260);
 await pause(1800);
 await scroll(-260);
 await pause(800);
 
 // 3. Yola çıkış: kiracıya gidecek mesaj
-await tap(page.getByRole('button', { name: L.way }), 700);
 await cap('3', L.c[2]);
+await tap(page.getByRole('button', { name: L.way }), 700);
 await tap(page.getByRole('radio', { name: L.min15 }), 2400);
 await tap(page.getByRole('button', { name: L.send }), 1400);
 
@@ -101,22 +101,20 @@ await tap(page.locator('#fa-note'), 200);
 await page.keyboard.type(L.note, { delay: 28 });
 await pause(400);
 await page.evaluate(() => document.activeElement?.blur());
-await tap(page.locator('.fa-form button[type=submit]'), 400);
 await cap('', L.c[4]);
-await pause(2600);
+await tap(page.locator('.fa-form button[type=submit]'), 3000);
 
 // 5. Ofis hesabına geç: Bugün
 await tap(page.locator('.etop-me'), 700);
-await tap(page.getByRole('button', { name: L.office }), 900);
 await cap('5', L.c[5]);
-await pause(1400);
+await tap(page.getByRole('button', { name: L.office }), 2300);
 await scroll(320);
 await pause(2000);
 
 // 6. Faturalar: taslak
 await tap(page.locator('.tabbar .tab', { hasText: L.more }), 700);
-await tap(page.locator('.sheet-list a', { hasText: L.invoices }), 900);
 await cap('6', L.c[6]);
+await tap(page.locator('.sheet-list a', { hasText: L.invoices }), 900);
 await tap(page.getByRole('tab', { name: L.toSend }), 2600);
 await cap('', L.c[7]);
 await pause(2800);

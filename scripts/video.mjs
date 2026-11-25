@@ -41,7 +41,7 @@ const L = {
     dispatch: 'Planlama', field: 'Teknisyen uygulaması', invoices: 'Faturalar', reports: 'Raporlar',
     live: 'Telefonda canlı dene', session: 'Oturumu başlat', way: 'Yola çıkıyorum', min15: /^15 dk/, send: 'SMS’i gönder, yola çık',
     arrived: 'Vardım', finish: 'İşi bitir', toSend: /^Gönderilecek/,
-    note: 'Old fire removed, new fire fitted and tested. Record left with the tenant.',
+    note: 'Eski şömine söküldü, yenisi takılıp denendi. Belge kiracıya bırakıldı.',
     c: [
       'Kombi, beyaz eşya ve klima servisi veren bir firmanın operasyon paneli.',
       'Demo doğrudan panelle açılır. Kısa bir not önce neyin deneneceğini söyler; tam rehber bir tık uzakta.',
@@ -120,7 +120,8 @@ if (!(await page.locator('.tcard').count())) {
   await page.screenshot({ path: join(TMP, 'hata-planlama.png') });
   throw new Error('Planlama açılmadı, adres: ' + (await page.evaluate(() => location.hash)));
 }
-const card = page.locator('.tcard', { hasText: 'Washer' });
+// İş numarasıyla seçilir: başlık arayüzün dilinde yazılır
+const card = page.locator('.tcard', { hasText: 'WR-48214' });
 await moveTo(card, { steps: 26, dx: -60 });
 await pause(300);
 await page.mouse.down();

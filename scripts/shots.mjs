@@ -18,7 +18,8 @@ const browser = await chromium.launch();
 
 async function shot(name, { route, lang = 'en', theme = 'light', size = DESK, before, guide = false }) {
   const ctx = await browser.newContext({ ...size, colorScheme: theme });
-  if (!guide) await ctx.addInitScript(() => { try { localStorage.setItem('wr-prefs', JSON.stringify({ chosen: true })); } catch (e) {} });
+  // Görüntüler ofis hesabıyla alınır (karşılama kartı kapalı); rehber görüntüsünde ilk ziyaret olduğu gibi kalır
+  if (!guide) await ctx.addInitScript(() => { try { localStorage.setItem('wr-prefs', JSON.stringify({ chosen: true })); localStorage.setItem('wr-account', JSON.stringify({ role: 'office' })); } catch (e) {} });
   const page = await ctx.newPage();
   await page.goto(`${BASE}/?lang=${lang}&theme=${theme}#/${route}`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => !document.querySelector('[aria-busy="true"]'), null, { timeout: 5000 }).catch(() => {});
@@ -41,7 +42,7 @@ try {
     route: 'dispatch',
     size: { viewport: { width: 1440, height: 1200 }, deviceScaleFactor: 2 },
     before: async (page) => {
-      const card = await page.locator('.tcard', { hasText: 'Washer' }).boundingBox();
+      const card = await page.locator('.tcard', { hasText: 'WR-48214' }).boundingBox();
       const lane = await page.locator('[data-lane="chris"]').boundingBox();
       const x = lane.x + ((13 * 60 + 20 - (7 * 60 + 30)) / (11 * 60)) * lane.width;
       const y = lane.y + lane.height / 2;
