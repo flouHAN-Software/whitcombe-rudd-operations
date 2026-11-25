@@ -177,14 +177,14 @@ function NeedRow({ n, d, now, days, load }: { n: Need; d: Data; now: number; day
       break;
     case 'pool':
       title = t('ov.n.pool', { cust: cust(j!.customer) });
-      sub = [typeLabel(j!.type), j!.site.area, ...(j!.flags ?? [])].join(' · ');
+      sub = [typeLabel(j!.type), j!.site.area, ...(j!.flags ?? []).map(td)].join(' · ');
       href = `#/jobs/${j!.id}`;
       act = t('ov.go.assign');
       break;
     case 'depot': {
       const p = n.part!;
       title = t('ov.n.depot', { eng: eng(j!.engineer), code: p.id });
-      sub = t('ov.n.depot.sub', { name: p.name, id: j!.id, n: p.depot, bin: p.bin });
+      sub = t('ov.n.depot.sub', { name: td(p.name), id: j!.id, n: p.depot, bin: p.bin });
       href = `#/stock/${p.id}`;
       act = t('ov.go.part');
       break;

@@ -39,8 +39,29 @@ export function tn(key: Key, n: number, vars?: Record<string, string | number>) 
   return t(n === 1 && one in STR ? (one as Key) : key, { n, ...vars });
 }
 
-/** Verideki sabit ifade (izin, uzmanlık, kaynak) Türkçe arayüzde çevrilir */
-export const td = (s: string) => (current === 'tr' ? DATA_TR[s] ?? s : s);
+// Records (job titles, notes, part names, invoice lines, event texts) are stored in English, because
+// both devices in a live session share the same data and may use different languages. The Turkish
+// interface translates them as they are drawn. The record dictionary loads with the seed data.
+export type DataRule = [RegExp, (m: RegExpMatchArray, tr: (s: string) => string) => string];
+let RECORDS: Record<string, string> = {};
+let RULES: DataRule[] = [];
+export function addRecordsTr(map: Record<string, string>, rules: DataRule[]) {
+  RECORDS = map;
+  RULES = rules;
+}
+
+function trData(s: string): string {
+  const hit = DATA_TR[s] ?? RECORDS[s];
+  if (hit !== undefined) return hit;
+  for (const [re, f] of RULES) {
+    const m = s.match(re);
+    if (m) return f(m, trData);
+  }
+  return s;
+}
+
+/** A piece of record text in the interface language. Free text typed into the demo stays as typed. */
+export const td = (s: string) => (current === 'tr' && s ? trData(s) : s);
 
 interface Ctx { prefs: Prefs; set: (p: Partial<Prefs>) => void }
 const C = createContext<Ctx | null>(null);

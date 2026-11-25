@@ -83,7 +83,7 @@ export function FieldPage() {
     if (!e || !locked || e.eng !== locked || (e.kind !== 'assigned' && e.kind !== 'moved')) return;
     const j = data?.jobs.find((x) => x.id === e.job);
     if (!j) return;
-    say(t(e.kind === 'assigned' ? 'fa.t.new' : 'fa.t.moved', { by: e.by ?? t('fa.byoffice'), id: j.id, title: j.title, t: j.plan ? hhmm(j.plan[0]) : '' }));
+    say(t(e.kind === 'assigned' ? 'fa.t.new' : 'fa.t.moved', { by: e.by ?? t('fa.byoffice'), id: j.id, title: td(j.title), t: j.plan ? hhmm(j.plan[0]) : '' }));
     // yalnızca yeni olayda
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live.last?.n]);
@@ -220,9 +220,9 @@ export function FieldPage() {
                       </button>
                       {peek === j.id && (
                         <div className="fa-peek">
-                          <p><b lang="en">{j.title}</b></p>
+                          <p><b>{td(j.title)}</b></p>
                           <p>{j.site.line}, {j.site.area}</p>
-                          <p className="fa-said" lang="en">{j.detail}</p>
+                          <p className="fa-said">{td(j.detail)}</p>
                         </div>
                       )}
                     </li>
@@ -312,12 +312,12 @@ function CurrentJob({ job, c, d, eng, now, sheet, setSheet, onSetOff, onArrive, 
         <Status view={st} />
       </div>
       {line}
-      <h2 className="fa-title" lang="en">{job.title}</h2>
+      <h2 className="fa-title">{td(job.title)}</h2>
       <p className="fa-type tnum">{job.id} · {typeLabel(job.type)}{job.code ? ` · ${job.code}` : ''}</p>
 
       {job.flags?.length ? (
         <ul className="jd-alerts fa-alerts">
-          {job.flags.map((f) => <li key={f} className="alert alert-late" lang="en">{f}</li>)}
+          {job.flags.map((f) => <li key={f} className="alert alert-late">{td(f)}</li>)}
         </ul>
       ) : null}
 
@@ -330,12 +330,12 @@ function CurrentJob({ job, c, d, eng, now, sheet, setSheet, onSetOff, onArrive, 
       </div>
 
       <dl className="facts fa-facts">
-        {job.contact && <div><dt>{t('f.onsite')}</dt><dd lang="en">{job.contact}</dd></div>}
-        {job.access && <div><dt>{t('f.access')}</dt><dd lang="en">{job.access}</dd></div>}
+        {job.contact && <div><dt>{t('f.onsite')}</dt><dd>{td(job.contact)}</dd></div>}
+        {job.access && <div><dt>{t('f.access')}</dt><dd>{td(job.access)}</dd></div>}
         {job.equipment && (
           <div>
             <dt>{t('f.equipment')}</dt>
-            <dd>{job.equipment.make} {job.equipment.model}{job.equipment.fitted ? <span className="muted"> · {t('fitted', { y: job.equipment.fitted })}</span> : null}</dd>
+            <dd>{job.equipment.make} {td(job.equipment.model)}{job.equipment.fitted ? <span className="muted"> · {t('fitted', { y: job.equipment.fitted })}</span> : null}</dd>
           </div>
         )}
         {job.code && <div><dt>{t('f.code')}</dt><dd>{job.code}{CODE_MEANING[job.code] ? <span className="muted"> · {td(CODE_MEANING[job.code])}</span> : null}</dd></div>}
@@ -343,7 +343,7 @@ function CurrentJob({ job, c, d, eng, now, sheet, setSheet, onSetOff, onArrive, 
 
       <div className="fa-block">
         <h4>{t('sec.said')}</h4>
-        <p className="fa-said" lang="en">{job.detail}</p>
+        <p className="fa-said">{td(job.detail)}</p>
       </div>
 
       {job.parts?.length ? (
@@ -355,7 +355,7 @@ function CurrentJob({ job, c, d, eng, now, sheet, setSheet, onSetOff, onArrive, 
               return (
                 <li key={p.part} className={'pstate-' + p.state}>
                   <span className="tnum fa-code">{p.part}</span>
-                  <span>{part?.name ?? p.part}{p.qty > 1 ? ` × ${p.qty}` : ''}</span>
+                  <span>{part ? td(part.name) : p.part}{p.qty > 1 ? ` × ${p.qty}` : ''}</span>
                   <span className="fa-pstate">{t(`part.${p.state}`)}{p.state === 'at_depot' && part ? ` · ${part.bin}` : ''}</span>
                 </li>
               );
@@ -382,7 +382,6 @@ function WayForm({ job, c, eng, now, onSend, onCancel }: { job: Job; c: Customer
   const first = eng.name.split(' ')[0];
   // Emlak ve işletme işlerinde SMS yerindeki kişiye gider (kiracı, muayenehane müdürü)
   const who = job.contact ? job.contact.split(': ')[1]?.split(' ')[0] : c.kind === 'household' ? c.name.split(' ')[0] : '';
-  const greet = who ? `Hi ${who}` : 'Hello';
   return (
     <form ref={ref} className="fa-form" onSubmit={(e) => { e.preventDefault(); onSend(mins); }} aria-label={t('fa.btn.way')}>
       <fieldset className="fa-fs">
@@ -397,8 +396,8 @@ function WayForm({ job, c, eng, now, onSend, onCancel }: { job: Job; c: Customer
         </div>
       </fieldset>
       <div className="fa-sms">
-        <span className="fa-sms-k">{t('fa.sms')} · {job.contact ? <span lang="en">{job.contact.split(' meets')[0]}</span> : <span className="tnum">{c.phone}</span>}</span>
-        <p lang="en">{greet}, it’s {first} from Whitcombe &amp; Rudd. I’m on my way and should be with you at about {hhmm(now + mins)}.</p>
+        <span className="fa-sms-k">{t('fa.sms')} · {job.contact ? <span>{td(job.contact.split(' meets')[0])}</span> : <span className="tnum">{c.phone}</span>}</span>
+        <p>{t(who ? 'fa.sms.hi' : 'fa.sms.hello', { who, first, t: hhmm(now + mins) })}</p>
       </div>
       <div className="fa-form-row">
         <button type="submit" className="btn btn-primary fa-go">{t('fa.sms.send')}</button>
@@ -459,7 +458,7 @@ function FinishForm({ job, d, onSend, onCancel }: { job: Job; d: Data; eng: Engi
                   checked={used.includes(p.part)}
                   onChange={(e) => setUsed(e.target.checked ? [...used, p.part] : used.filter((x) => x !== p.part))}
                 />
-                <span><span className="tnum">{p.part}</span> {part?.name}{p.qty > 1 ? ` × ${p.qty}` : ''}</span>
+                <span><span className="tnum">{p.part}</span> {part ? td(part.name) : ''}{p.qty > 1 ? ` × ${p.qty}` : ''}</span>
               </label>
             );
           })}
@@ -505,7 +504,7 @@ function OfficeView({ d, eng, jobs, now }: { d: Data; eng: Engineer; jobs: Job[]
               <span className="tnum fa-feed-t">{stamp(e.at)}</span>
               <span>
                 <a href={`#/jobs/${j.id}`} className="tnum">{j.id}</a>
-                <span lang="en"> {e.text}</span>
+                <span> {td(e.text)}</span>
               </span>
             </li>
           ))}

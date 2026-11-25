@@ -103,7 +103,7 @@ export function DispatchPage() {
     [now]
   );
 
-  // Olay metinleri veridir (firma İngiltere'de); bildirimler arayüzün dilinde
+  // Event texts are stored in English and shown through td(); toasts are written in the interface language
   function apply(job: Job, eng: Engineer, start: number, newWin?: [number, number]) {
     const prev = job;
     const same = job.engineer === eng.id;
@@ -419,7 +419,7 @@ function Block({ job, data, now, onDown, dim }: { job: Job; data: Data; now: num
       onKeyDown={(ev) => { if (ev.key === 'Enter') { ev.preventDefault(); go('dispatch', job.id); } }}
       // Ad ekrandaki yazıyla başlar (sesle komut verenler için), ardından ayrıntı gelir
       aria-label={`${shortName(c.name, c.kind)} · ${job.site.area} ${blockLine(job, st)}, ${job.id}, ${c.name}, ${time}`}
-      title={`${job.id} · ${job.title}\n${c.name}, ${street(job.site.line)}, ${job.site.area}\n${time} · ${state}${can ? '' : '\n' + t('d.locked')}`}
+      title={`${job.id} · ${td(job.title)}\n${c.name}, ${street(job.site.line)}, ${job.site.area}\n${time} · ${state}${can ? '' : '\n' + t('d.locked')}`}
     >
       {over > 0 && <i className="overrun" style={{ width: over + '%' }} aria-hidden="true" />}
       <b>{shortName(c.name, c.kind)} · {job.site.area}</b>{' '}
@@ -448,7 +448,7 @@ function TrayCard({ job, data, selected, onDown, onKeyPick }: { job: Job; data: 
         {job.flags?.length ? <span className="tag-priority">{t('priority')}</span> : null}
         <span className="tc-win tnum">{job.window ? `${hhmm(job.window[0])}–${hhmm(job.window[1])}` : job.date ? t('d.any') : t('d.nodate')}</span>
       </span>
-      <b>{job.title}</b>
+      <b>{td(job.title)}</b>
       <span className="tc-who">{c.name} · {street(job.site.line)}, {job.site.area}</span>
       <span className="tc-meta">{typeLabel(job.type)} · {t('d.about', { m: Math.round(durOf(job) / 15) * 15 })}{e ? ' · ' + t('d.notime', { who: e.name }) : ''}</span>
     </button>
@@ -505,7 +505,7 @@ function Agenda({ data, now, tray }: { data: Data; now: number; tray: Job[] }) {
             return (
               <li key={j.id}>
                 <a href={'#/dispatch/' + j.id}>
-                  <b>{j.title}{j.flags?.length ? <span className="tag-priority">{t('priority')}</span> : null}</b>
+                  <b>{td(j.title)}{j.flags?.length ? <span className="tag-priority">{t('priority')}</span> : null}</b>
                   <span>{c.name} · {j.site.area}</span>
                   <span className="tnum muted">{windowText(j)}</span>
                 </a>
@@ -538,7 +538,7 @@ function Agenda({ data, now, tray }: { data: Data; now: number; tray: Job[] }) {
                   <span className="tnum ag-time">{hhmm(s[0])}<small>{hhmm(s[1])}</small></span>
                   <span className="ag-what">
                     <b>{shortName(c.name, c.kind)} · {j.site.area}</b>
-                    <span lang="en">{j.title}</span>
+                    <span>{td(j.title)}</span>
                     <Status view={statusOf(j, now)} />
                   </span>
                 </a>

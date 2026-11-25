@@ -212,7 +212,7 @@ function CustomerDetail({ c, data, onClose }: { c: Customer; data: Data; onClose
         : { tone: 'late', text: t('cd.owe', { m: money(m.late), n: m.lateN, d: m.oldest }) }
     );
   }
-  p.open.forEach((j) => j.flags?.forEach((f) => alerts.push({ tone: 'risk', text: `${j.id}: ${f}`, href: '#/jobs/' + j.id })));
+  p.open.forEach((j) => j.flags?.forEach((f) => alerts.push({ tone: 'risk', text: `${j.id}: ${td(f)}`, href: '#/jobs/' + j.id })));
 
   return (
     <aside ref={box} className="jd jd-overlay" aria-label={c.name} tabIndex={-1}>
@@ -233,7 +233,7 @@ function CustomerDetail({ c, data, onClose }: { c: Customer; data: Data; onClose
       {alerts.length > 0 && (
         <ul className="jd-alerts">
           {alerts.map((a, i) => (
-            <li key={i} className={'alert alert-' + a.tone}>{a.href ? <a className="plain-link" href={a.href} lang={a.tone === 'risk' ? 'en' : undefined}>{a.text}</a> : a.text}</li>
+            <li key={i} className={'alert alert-' + a.tone}>{a.href ? <a className="plain-link" href={a.href}>{a.text}</a> : a.text}</li>
           ))}
         </ul>
       )}
@@ -252,8 +252,8 @@ function CustomerDetail({ c, data, onClose }: { c: Customer; data: Data; onClose
           {sites.map(([addr, j]) => (
             <li key={addr}>
               <b lang="en">{addr}</b>
-              {j.equipment && <span className="muted" lang="en">{j.equipment.make} {j.equipment.model}{j.equipment.fitted ? ` · ${t('fitted', { y: j.equipment.fitted })}` : ''}{j.equipment.extra ? ` · ${j.equipment.extra}` : ''}</span>}
-              {j.contact && <span className="muted" lang="en">{j.contact}</span>}
+              {j.equipment && <span className="muted">{j.equipment.make} {td(j.equipment.model)}{j.equipment.fitted ? ` · ${t('fitted', { y: j.equipment.fitted })}` : ''}{j.equipment.extra ? ` · ${td(j.equipment.extra)}` : ''}</span>}
+              {j.contact && <span className="muted">{td(j.contact)}</span>}
             </li>
           ))}
         </ul>
@@ -267,7 +267,7 @@ function CustomerDetail({ c, data, onClose }: { c: Customer; data: Data; onClose
               <a href={'#/jobs/' + j.id}>
                 <span className="tnum sd-jid">{j.id}</span>
                 <span>
-                  <b lang="en">{j.title}</b>
+                  <b>{td(j.title)}</b>
                   <span className="cd-line">
                     <Status view={statusOf(j, now)} compact />
                     <span className="muted tnum">{j.date ? dayLabel(j.date) : t('notbooked')}{sites.length > 1 ? ` · ${street(j.site.line)}` : ''}</span>

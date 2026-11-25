@@ -85,7 +85,7 @@ export function StockPage() {
     const words = q.toLocaleLowerCase().split(/\s+/).filter(Boolean);
     return parts
       .filter((p) => (view === 'all' ? true : view === 'reorder' ? needsReorder(p) : !!p.order))
-      .filter((p) => words.every((w) => `${p.id} ${p.name} ${p.supplier}`.toLocaleLowerCase().includes(w)))
+      .filter((p) => words.every((w) => `${p.id} ${p.name} ${td(p.name)} ${p.supplier}`.toLocaleLowerCase().includes(w)))
       .sort((a, b) => stockState(a).rank - stockState(b).rank || a.id.localeCompare(b.id));
   }, [parts, view, q]);
 
@@ -265,10 +265,10 @@ function StockRow({ p, data, checked, open, onToggle }: { p: Part; data: Data; c
       <span className="sc-check" role="cell">
         <input type="checkbox" checked={checked} onChange={onToggle} aria-label={t('sb.row', { part: p.id })} />
       </span>
-      <a className="sc-link" href={'#/stock/' + p.id} role="cell" aria-label={`${p.id}, ${p.name}`}>
+      <a className="sc-link" href={'#/stock/' + p.id} role="cell" aria-label={`${p.id}, ${td(p.name)}`}>
         <span className="sc-code tnum">{p.id}</span>
         <span className="sc-name">
-          <span className="t1" lang="en">{p.name}</span>
+          <span className="t1">{td(p.name)}</span>
           <span className="t2">{p.supplier}</span>
         </span>
         <span className="sc-depot num tnum">{p.depot}</span>
@@ -313,7 +313,7 @@ function PartDetail({ p, data, onClose, onReorder, onReceive, onSend }: { p: Par
         <button type="button" className="icon-btn jd-close" onClick={onClose} aria-label={t('jd.close')} title={t('jd.close')}><Icon name="close" /></button>
       </div>
       <div className="jd-head">
-        <h2 lang="en">{p.name}</h2>
+        <h2>{td(p.name)}</h2>
         <div className="jd-state">
           <Status view={st} />
           {p.order && <span className="jd-eng tnum">{t('ss.ordered', { q: p.order.qty, d: dayLabel(p.order.due) })}</span>}
@@ -385,7 +385,7 @@ function PartDetail({ p, data, onClose, onReorder, onReceive, onSend }: { p: Par
                 <li key={j.id}>
                   <a href={'#/jobs/' + j.id}>
                     <span className="tnum sd-jid">{j.id}</span>
-                    <span><b lang="en">{j.title}</b><span className="muted">{c.name}{e ? ` · ${e.name}` : ''} · {t(`part.${jp.state}`)}</span></span>
+                    <span><b>{td(j.title)}</b><span className="muted">{c.name}{e ? ` · ${e.name}` : ''} · {t(`part.${jp.state}`)}</span></span>
                   </a>
                 </li>
               );

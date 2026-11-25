@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../../data/store';
 import { statusOf, street, windowText, typeLabel, type StatusView } from '../../data/derive';
-import { t } from '../../lib/i18n';
+import { t, td } from '../../lib/i18n';
 import type { Key } from '../../lib/strings';
 import { TODAY } from '../../data/today';
 import type { Data, Job } from '../../data/types';
@@ -53,7 +53,7 @@ const byTime = (a: Row, b: Row) =>
 function haystack(j: Job, d: Data) {
   const c = d.customers.find((x) => x.id === j.customer);
   const e = d.engineers.find((x) => x.id === j.engineer);
-  return [j.id, j.title, j.code, c?.name, j.site.line, j.site.area, e?.name, j.equipment?.make, j.equipment?.model, typeLabel(j.type)]
+  return [j.id, j.title, td(j.title), j.code, c?.name, j.site.line, j.site.area, e?.name, j.equipment?.make, j.equipment?.model, td(j.equipment?.model ?? ''), typeLabel(j.type)]
     .filter(Boolean)
     .join(' ')
     .toLocaleLowerCase();
@@ -291,7 +291,7 @@ function JobRow({ row, data, cursor, open, onPick }: { row: Row; data: Data; cur
   const { job, st } = row;
   const c = data.customers.find((x) => x.id === job.customer)!;
   const e = data.engineers.find((x) => x.id === job.engineer);
-  const what = job.equipment ? `${job.equipment.make} ${job.equipment.model}` : typeLabel(job.type);
+  const what = job.equipment ? `${job.equipment.make} ${td(job.equipment.model)}` : typeLabel(job.type);
   return (
     <div
       id={'job-' + job.id}
@@ -303,7 +303,7 @@ function JobRow({ row, data, cursor, open, onPick }: { row: Row; data: Data; cur
       <span className="jc-id tnum">{job.id}</span>
       <span className="jc-what">
         <span className="t1">
-          {job.title}
+          {td(job.title)}
           {job.flags?.length && st.tone !== 'done' ? <span className="tag-priority">{t('priority')}</span> : null}
         </span>
         <span className="t2">{what}{job.code ? ` · ${job.code}` : ''}</span>

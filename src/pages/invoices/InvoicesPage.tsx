@@ -7,7 +7,7 @@ import { balanceOf, daysBetween, invStatus, lateDays, paidOf, phaseOf, subtotal,
 import { useDemoMinute } from '../../lib/clock';
 import { go, useRoute } from '../../lib/router';
 import { load, save } from '../../lib/storage';
-import { t, tn } from '../../lib/i18n';
+import { t, td, tn } from '../../lib/i18n';
 import type { Key } from '../../lib/strings';
 import { PageHeader } from '../../components/Shell';
 import { Status } from '../../components/Status';
@@ -311,7 +311,7 @@ function InvoiceRow({ inv, name, pickable, checked, open, onToggle }: { inv: Inv
         <span className="sc-code tnum">{inv.id}</span>
         <span className="sc-name">
           <span className="t1">{name}</span>
-          <span className="t2 tnum">{inv.job ?? ''}{inv.site ? ` · ${street(inv.site)}` : ''}</span>
+          <span className="t2 tnum">{inv.job ?? ''}{inv.site ? ` · ${td(street(inv.site))}` : ''}</span>
         </span>
         <span className="ic-issued tnum">{dayLabel(inv.issued)}</span>
         <span className="num tnum ic-total">{money(totalOf(inv))}</span>
@@ -456,7 +456,7 @@ function InvoiceDetail({ inv, data, onClose, onSend, onRemind, onPay }: {
           <tbody>
             {inv.lines.map((l, i) => (
               <tr key={i}>
-                <td lang="en">{l.text}{l.qty > 1 && <span className="muted tnum"> · {l.qty} × {money(l.unit)}</span>}</td>
+                <td>{td(l.text)}{l.qty > 1 && <span className="muted tnum"> · {l.qty} × {money(l.unit)}</span>}</td>
                 <td className="num tnum">{money(l.qty * l.unit)}</td>
               </tr>
             ))}
@@ -478,10 +478,10 @@ function InvoiceDetail({ inv, data, onClose, onSend, onRemind, onPay }: {
           {inv.job && (
             <div>
               <dt>{t('if.job')}</dt>
-              <dd className="tnum">{job ? <a href={'#/jobs/' + job.id}>{job.id}</a> : <>{inv.job} <span className="muted">· {t('if.archived')}</span></>}{job && <span className="muted" lang="en"> · {job.title}</span>}</dd>
+              <dd className="tnum">{job ? <a href={'#/jobs/' + job.id}>{job.id}</a> : <>{inv.job} <span className="muted">· {t('if.archived')}</span></>}{job && <span className="muted"> · {td(job.title)}</span>}</dd>
             </div>
           )}
-          {inv.site && <div><dt>{t('f.site')}</dt><dd lang="en">{inv.site}</dd></div>}
+          {inv.site && <div><dt>{t('f.site')}</dt><dd>{td(inv.site)}</dd></div>}
           <div><dt>{t('if.issued')}</dt><dd className="tnum">{dayLabel(inv.issued)}</dd></div>
           <div><dt>{t('if.due')}</dt><dd className="tnum">{dayLabel(inv.due)} <span className="muted">· {t(`terms.${inv.terms}` as Key)}</span></dd></div>
         </dl>
@@ -494,8 +494,8 @@ function InvoiceDetail({ inv, data, onClose, onSend, onRemind, onPay }: {
             <li key={i} className={'ev ev-inv-' + ev.kind}>
               <span className="ev-when tnum">{stamp(ev.at)}</span>
               <div className="ev-body">
-                <span className="ev-head"><b>{t(KIND[ev.kind])}</b>{ev.amount ? <> · <span className="tnum">{money(ev.amount)}</span></> : null} · {ev.by}</span>
-                <p lang="en">{ev.text}</p>
+                <span className="ev-head"><b>{t(KIND[ev.kind])}</b>{ev.amount ? <> · <span className="tnum">{money(ev.amount)}</span></> : null} · {td(ev.by)}</span>
+                <p>{td(ev.text)}</p>
               </div>
             </li>
           ))}

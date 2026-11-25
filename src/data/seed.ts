@@ -7,6 +7,8 @@
 import type { Customer, Data, Engineer, EventKind, Invoice, InvoiceEventKind, Job, JobEvent, JobPart, JobStatus, JobType, Part, PayMethod } from './types';
 import { addDays, daysBetween, draftFor, totalOf } from './billing';
 import { TODAY } from './today';
+// Turkish wording of the records travels with the seed chunk
+import './records-tr';
 
 const m = (hm: string) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5));
 const hm = (min: number) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;

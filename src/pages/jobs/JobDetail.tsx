@@ -55,7 +55,7 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
 
   const backTo = () => (job.date && job.engineer ? 'booked' : 'unassigned') as Job['status'];
 
-  // Olay metinleri veridir; firma İngiltere'de olduğu için İngilizce yazılır
+  // Event texts are stored in English; the Turkish interface shows them through td()
   const act = {
     onWay: () => updateJob(job.id, { status: 'en_route', eta: now + 20 }, { at, kind: 'on_way', text: `Marked on the way for ${eng?.name}. ETA ${hhmm(now + 20)}, text sent to the customer.` }),
     arrived: () => updateJob(job.id, { status: 'on_site', arrived: now }, { at, kind: 'arrived', text: `Marked arrived for ${eng?.name}` }),
@@ -130,7 +130,7 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
     const cur = data.jobs.find((x) => x.engineer === job.engineer && x.date === TODAY && x.status === 'on_site');
     alerts.push({ tone: 'risk', text: t('a.behind', { t: job.plan ? hhmm(job.plan[0]) : '–' }) + (cur ? t('a.still', { who, id: cur.id, area: cur.site.area }) : t('a.notoff', { who })) });
   }
-  if (job.status === 'on_hold' && job.holdReason) alerts.push({ tone: 'info', text: <>{t('a.hold')} {job.holdReason}</> });
+  if (job.status === 'on_hold' && job.holdReason) alerts.push({ tone: 'info', text: <>{t('a.hold')} {td(job.holdReason)}</> });
   if (job.status === 'waiting_parts') {
     const p = job.parts?.find((x) => x.state === 'ordered');
     if (p)
@@ -139,7 +139,7 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
         text: t('a.waiting', { part: p.part, due: p.due ? t('a.due', { d: dayLabel(p.due) }) : '' }) + (job.date ? t('a.visit', { d: dayLabel(job.date) }) : t('a.tobook'))
       });
   }
-  if (job.status !== 'done') job.flags?.forEach((f) => alerts.push({ tone: 'late', text: <><b>{t('a.prio')}</b> {f}</> }));
+  if (job.status !== 'done') job.flags?.forEach((f) => alerts.push({ tone: 'late', text: <><b>{t('a.prio')}</b> {td(f)}</> }));
   // Müşterinin gecikmiş borcu varsa ziyaret öncesi görünsün
   const debt = owed(data.invoices, cust.id);
   if (debt.late > 0 && job.status !== 'done') alerts.push({ tone: 'risk', text: <a className="plain-link" href={'#/customers/' + cust.id}>{t('jd.owes', { c: cust.name, m: money(debt.late), d: debt.oldest })}</a> });
@@ -162,7 +162,7 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
       </div>
 
       <div className="jd-head">
-        <h2>{job.title}</h2>
+        <h2>{td(job.title)}</h2>
         <div className="jd-state">
           <Status view={st} />
           <span className="jd-eng">{eng ? eng.name : t('jd.noeng')}</span>
@@ -206,15 +206,15 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
 
       <section className="jd-sec">
         <h3>{t('sec.said')}</h3>
-        <p className="jd-said" lang="en">{job.detail}</p>
+        <p className="jd-said">{td(job.detail)}</p>
       </section>
 
       <section className="jd-sec">
         <dl className="facts">
           <Fact k={t('f.window')} v={<span className="tnum">{windowText(job)}</span>} />
           <Fact k={t('f.site')} v={<>{job.site.line}, {job.site.area}</>} />
-          {job.contact && <Fact k={t('f.onsite')} v={<span lang="en">{job.contact}</span>} />}
-          {job.access && <Fact k={t('f.access')} v={<span lang="en">{job.access}</span>} />}
+          {job.contact && <Fact k={t('f.onsite')} v={td(job.contact)} />}
+          {job.access && <Fact k={t('f.access')} v={td(job.access)} />}
           <Fact
             k={t('f.customer')}
             v={<><a href={'#/customers/' + cust.id}>{cust.name}</a><span className="muted"> · {kind} · {t('since', { y: cust.since })}</span><br /><span className="tnum">{cust.phone}</span></>}
@@ -222,7 +222,7 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
           {job.equipment && (
             <Fact
               k={t('f.equipment')}
-              v={<>{job.equipment.make} {job.equipment.model}{job.equipment.fitted ? <span className="muted"> · {t('fitted', { y: job.equipment.fitted })}</span> : null}{job.equipment.extra ? <span className="muted"> · {job.equipment.extra}</span> : null}</>}
+              v={<>{job.equipment.make} {td(job.equipment.model)}{job.equipment.fitted ? <span className="muted"> · {t('fitted', { y: job.equipment.fitted })}</span> : null}{job.equipment.extra ? <span className="muted"> · {td(job.equipment.extra)}</span> : null}</>}
             />
           )}
           {job.code && <Fact k={t('f.code')} v={<>{job.code}{CODE_MEANING[job.code] ? <span className="muted"> · {td(CODE_MEANING[job.code])}</span> : null}</>} />}
@@ -240,7 +240,7 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
               return (
                 <li key={p.part} className={'pstate-' + p.state}>
                   <span className="tnum jd-code">{p.part}</span>
-                  <span className="jd-pname">{part?.name ?? p.part}{p.qty > 1 ? ` × ${p.qty}` : ''}</span>
+                  <span className="jd-pname">{part ? td(part.name) : p.part}{p.qty > 1 ? ` × ${p.qty}` : ''}</span>
                   <span className="jd-pstate">{PART_STATE(p.state)}{p.due ? ` · ${dayLabel(p.due)}` : ''}</span>
                   {part && <span className="tnum jd-pcost">{money(part.cost * p.qty)}</span>}
                 </li>
@@ -275,8 +275,8 @@ export function JobDetail({ job, data, now, focusSignal, onClose, overlay = fals
             <li key={i} className={'ev ev-' + ev.kind}>
               <span className="ev-when tnum">{stamp(ev.at)}</span>
               <div className="ev-body">
-                <span className="ev-head"><b>{KIND_LABEL(ev.kind)}</b> · {ev.by}</span>
-                <p lang="en">{ev.text}</p>
+                <span className="ev-head"><b>{KIND_LABEL(ev.kind)}</b> · {td(ev.by)}</span>
+                <p>{td(ev.text)}</p>
               </div>
             </li>
           ))}

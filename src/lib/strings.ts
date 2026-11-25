@@ -2,7 +2,7 @@
 // İki dil birbirinden çevrilmez; her biri o dilde bir operasyon müdürünün söyleyeceği gibi ayrı yazılır
 // (ör. "tray" → "iş havuzu", "window" → "randevu aralığı").
 // Türkçede saatten ya da sayıdan sonra okunuşa bağlı ek kullanılmaz ("10:15'ten" gibi); cümle buna göre kurulur.
-// Veri (iş kayıtları, müşteri notları, olay metinleri) İngilizce kalır: firma İngiltere'de.
+// Kayıtlar veride İngilizce tutulur; Türkçe arayüzde ekrana basılırken çevrilir (data/records-tr.ts).
 
 export const STR = {
   // kabuk
@@ -636,6 +636,8 @@ export const STR = {
   'fa.eta.q': ['When will you get there?', 'Kaç dakikada orada olursunuz?'],
   'fa.eta.n': ['{n} min', '{n} dk'],
   'fa.sms': ['Text that will be sent', 'Gönderilecek SMS'],
+  'fa.sms.hi': ['Hi {who}, it’s {first} from Whitcombe & Rudd. I’m on my way and should be with you at about {t}.', 'Merhaba {who}, ben Whitcombe & Rudd’dan {first}. Yola çıktım, saat {t} civarında yanınızda olurum.'],
+  'fa.sms.hello': ['Hello, it’s {first} from Whitcombe & Rudd. I’m on my way and should be with you at about {t}.', 'Merhaba, ben Whitcombe & Rudd’dan {first}. Yola çıktım, saat {t} civarında yanınızda olurum.'],
   'fa.sms.send': ['Send text and set off', 'SMS’i gönder, yola çık'],
   'fa.out.q': ['How did it go?', 'İş nasıl sonuçlandı?'],
   'fa.out.done': ['Fixed', 'Tamamlandı'],
@@ -849,7 +851,7 @@ export const STR = {
   'wc.close': ['Close the welcome', 'Karşılamayı kapat'],
 
   // ilk giriş
-  'wel.trnote': ['', 'Menüler ve ekranlar Türkçe olur. Firma İngiltere’de çalıştığı için iş kayıtları ve müşteri notları İngilizce kalır.']
+  'wel.trnote': ['', 'Firma İngiltere’de çalışıyor: kişi ve sokak adları, posta kodları ve sterlin tutarları İngiltere’deki gibi kalır. İş kayıtları, notlar ve parça adları Türkçe gösterilir.']
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type Key = keyof typeof STR;
