@@ -68,33 +68,43 @@
 .blk {
   position: absolute; top: 7px; bottom: 7px; z-index: 2;
   display: flex; flex-direction: column; justify-content: center; gap: 0;
-  min-width: 0; padding: 3px 7px 3px 10px; overflow: hidden;
+  min-width: 0; padding: 3px 5px 3px 9px; overflow: hidden;
   border: 1px solid var(--line-2); border-radius: var(--r1);
   background: var(--surface); color: var(--ink);
   box-shadow: inset 3px 0 0 var(--ink-4);
   text-align: left; font: 440 14px/19px var(--sans); font-stretch: 82%;
   container-type: inline-size;
 }
-.blk b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.blk span { color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Name line: when the area does not fit next to the name it wraps onto a hidden second line, so the name is never cut for it */
+.blk-n { display: flex; flex-wrap: wrap; height: 19px; overflow: hidden; font-weight: 600; }
+.blk-n > span:first-child { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blk-a { flex: none; white-space: nowrap; }
+.blk-s, .blk-a2 { color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.blk-sh, .blk-a2 { display: none; }
 .blk.can-move { cursor: grab; }
 .blk.can-move:active { cursor: grabbing; }
 .blk:hover { border-color: var(--ink-4); }
 .blk:focus-visible { outline: 2px solid var(--cu); outline-offset: 1px; z-index: 5; }
 .blk.is-dim { opacity: .35; }
-@container (max-width: 64px) { .blk span { display: none; } }
+@container (max-width: 139px) { .blk-l { display: none; } .blk-sh { display: inline; } }
+@container (max-width: 69px) {
+  .blk-s, .blk-a { display: none; }
+  .blk-a2 { display: block; }
+  /* Mona Sans goes down to 75% width: the narrowest jobs use it, and the padding, so a surname fits whole */
+  .blk-n, .blk-a2 { margin: 0 -3px 0 -2px; font-stretch: 75%; }
+}
 
 .blk.tone-done { background: var(--sunk); box-shadow: inset 3px 0 0 var(--ok-solid); }
-.blk.tone-done b { color: var(--ink-2); font-weight: 560; }
+.blk.tone-done .blk-n { color: var(--ink-2); font-weight: 560; }
 .blk.tone-late { border-color: var(--late-line); box-shadow: inset 3px 0 0 var(--late); }
-.blk.tone-late span { color: var(--late); }
+.blk.tone-late .blk-s { color: var(--late); }
 .blk.tone-live { background: var(--live-wash); border-color: var(--live-line); box-shadow: inset 3px 0 0 var(--live-solid); }
 .blk.tone-onsite { background: var(--live-wash); border-color: var(--live-line); box-shadow: inset 3px 0 0 var(--live); }
-.blk.tone-onsite b { color: var(--live); }
+.blk.tone-onsite .blk-n { color: var(--live); }
 .blk.tone-over { background: var(--live-wash); border-color: var(--risk-line); box-shadow: inset 3px 0 0 var(--live); }
-.blk.tone-over span { color: var(--risk); }
+.blk.tone-over .blk-s { color: var(--risk); }
 .blk.tone-behind { border-color: var(--risk-line); box-shadow: inset 3px 0 0 var(--risk-solid); }
-.blk.tone-behind span { color: var(--risk); }
+.blk.tone-behind .blk-s { color: var(--risk); }
 .overrun {
   position: absolute; top: 0; right: 0; bottom: 0; z-index: -1;
   background: repeating-linear-gradient(135deg, var(--risk-wash) 0 5px, var(--overrun-b) 5px 7px);

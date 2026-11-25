@@ -76,7 +76,7 @@ interface Spec {
   detail: string;
   code?: string;
   eq?: [string, string, number?, string?];
-  cust: [string, Customer['kind'], number];
+  cust: [string, Customer['kind'], number, string?];
   site: [string, string];
   contact?: string;
   access?: string;
@@ -151,7 +151,7 @@ const S: Spec[] = [
   {
     id: '48185', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Annual gas safety record: boiler and hob.',
-    eq: ['Ideal', 'Logic+ C24', 2020, 'gas hob'], cust: ['Harbourside Lettings', 'landlord', 2009],
+    eq: ['Ideal', 'Logic+ C24', 2020, 'gas hob'], cust: ['Harbourside Lettings', 'landlord', 2009, 'Harbourside'],
     site: ['Flat 1, 14 Zetland Road', 'BS6'], contact: 'Tenant: Ola Adeyemi',
     win: ['08:00', '10:00'], plan: ['08:00', 80], eng: 'sam', status: 'done', arrived: '08:04', done: '09:22',
     doneNote: 'Gas safety record issued. Boiler and hob pass. Copy emailed to the agent.',
@@ -160,7 +160,7 @@ const S: Spec[] = [
   {
     id: '48211', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Annual gas safety record: boiler and two gas fires (living room, front bedroom).',
-    eq: ['Baxi', '800 Combi 2', 2019, '2 gas fires'], cust: ['Harbourside Lettings', 'landlord', 2009],
+    eq: ['Baxi', '800 Combi 2', 2019, '2 gas fires'], cust: ['Harbourside Lettings', 'landlord', 2009, 'Harbourside'],
     site: ['Flat 3, 61 Ashley Down Road', 'BS7'], contact: 'Tenant: Rory Quinn',
     access: "Tenant works nights. Knock, don't ring. Key safe at the side gate, code from the office.",
     win: ['10:00', '12:00'], plan: ['10:45', 75], eng: 'sam', status: 'en_route', onWay: '10:29', eta: '10:52',
@@ -178,7 +178,7 @@ const S: Spec[] = [
   {
     id: '48231', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Annual gas safety record: boiler only. Agent meets the engineer with keys.',
-    eq: ['Vaillant', 'ecoTEC pro 28', 2015], cust: ['Clifton Property Management', 'landlord', 2014],
+    eq: ['Vaillant', 'ecoTEC pro 28', 2015], cust: ['Clifton Property Management', 'landlord', 2014, 'Clifton PM'],
     site: ['Flat 2, 9 Hotwells Road', 'BS8'], contact: 'Agent: Tess Moran meets you there',
     win: ['14:00', '16:00'], plan: ['14:30', 60], eng: 'sam', status: 'booked',
     log: ['2026-11-09T14:02', 'Agent portal', 'Agent portal']
@@ -306,7 +306,7 @@ const S: Spec[] = [
   {
     id: '48184', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Five-bed student house: boiler, hob and one gas fire.',
-    eq: ['Worcester Bosch', 'Greenstar 30CDi', 2011, 'hob, gas fire'], cust: ['Avonside Student Lets', 'landlord', 2013],
+    eq: ['Worcester Bosch', 'Greenstar 30CDi', 2011, 'hob, gas fire'], cust: ['Avonside Student Lets', 'landlord', 2013, 'Avonside'],
     site: ['31 Kingsdown Parade', 'BS6'], contact: 'Tenant: Jas Bhatti',
     win: ['08:00', '10:00'], plan: ['08:00', 75], eng: 'gemma', status: 'done', arrived: '08:03', done: '09:12',
     doneNote: 'Record issued. Gas fire passes, but the flue spigot is worn; advised the landlord to replace within the year.',
@@ -315,7 +315,7 @@ const S: Spec[] = [
   {
     id: '48202', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Annual gas safety record: boiler and hob.',
-    eq: ['Vaillant', 'ecoTEC plus 825', 2018, 'gas hob'], cust: ['Clifton Property Management', 'landlord', 2014],
+    eq: ['Vaillant', 'ecoTEC plus 825', 2018, 'gas hob'], cust: ['Clifton Property Management', 'landlord', 2014, 'Clifton PM'],
     site: ['Flat 1, 44 Jacobs Wells Road', 'BS8'], contact: 'Tenant: Marta Silva',
     win: ['08:00', '12:00'], plan: ['09:30', 60], eng: 'gemma', status: 'done', arrived: '09:31', done: '10:25',
     doneNote: 'Record issued. All appliances pass.',
@@ -324,7 +324,7 @@ const S: Spec[] = [
   {
     id: '48212', type: 'recall', title: 'Replace gas fire left At Risk',
     detail: 'Gas fire classified At Risk on 9 Nov and turned off with the tenant\'s agreement. Landlord approved a replacement; new fire is on Gemma\'s van.',
-    eq: ['Valor', 'gas fire', 2006], cust: ['Harbourside Lettings', 'landlord', 2009],
+    eq: ['Valor', 'gas fire', 2006], cust: ['Harbourside Lettings', 'landlord', 2009, 'Harbourside'],
     site: ['Flat 2, 14 Zetland Road', 'BS6'], contact: 'Tenant: Wes Carter',
     win: ['11:00', '13:00'], plan: ['11:00', 120], eng: 'gemma', status: 'booked',
     parts: [['GFR-0040', 1, 'on_van']],
@@ -333,7 +333,7 @@ const S: Spec[] = [
   {
     id: '48225', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Six-bed student house: boiler and hob.',
-    eq: ['Baxi', '800 Combi 2', 2020, 'gas hob'], cust: ['Avonside Student Lets', 'landlord', 2013],
+    eq: ['Baxi', '800 Combi 2', 2020, 'gas hob'], cust: ['Avonside Student Lets', 'landlord', 2013, 'Avonside'],
     site: ['18 Cotham Road', 'BS6'], contact: 'Tenant: Freddie Lowe',
     win: ['14:00', '16:00'], plan: ['14:00', 60], eng: 'gemma', status: 'booked',
     log: ['2026-11-01T12:04', 'Agent portal', 'Agent portal']
@@ -452,7 +452,7 @@ const S: Spec[] = [
   {
     id: '48192', type: 'cooling', title: 'Annual service, three wall units',
     detail: 'Annual service and filter clean on three wall units: two surgeries and reception.',
-    eq: ['Mitsubishi Electric', 'wall-mounted split units', 2020, '3 units'], cust: ['Gloucester Road Dental Practice', 'business', 2020],
+    eq: ['Mitsubishi Electric', 'wall-mounted split units', 2020, '3 units'], cust: ['Gloucester Road Dental Practice', 'business', 2020, 'Gloucester Rd Dental'],
     site: ['201 Gloucester Road', 'BS7'], contact: 'Practice manager: Helen Cho',
     access: 'Surgeries free from 08:00 to 09:00 only. Reception unit any time.',
     win: ['08:00', '10:00'], plan: ['08:00', 130], eng: 'imran', status: 'done', arrived: '07:58', done: '10:12',
@@ -462,7 +462,7 @@ const S: Spec[] = [
   {
     id: '48210', type: 'cooling', title: 'Comms cupboard unit not cooling',
     detail: 'Unit in the server cupboard blowing warm air, error light flashing. Cupboard at 31 °C.',
-    eq: ['Daikin', 'wall-mounted split unit', 2019], cust: ['Kestrel Print Studio', 'business', 2019],
+    eq: ['Daikin', 'wall-mounted split unit', 2019], cust: ['Kestrel Print Studio', 'business', 2019, 'Kestrel Print'],
     site: ['96 North Street', 'BS3'], contact: 'Office manager: Sian Hughes',
     win: ['11:00', '13:00'], plan: ['11:00', 90], eng: 'imran', status: 'booked',
     flags: ['Server cupboard at 31 °C. Door propped open with a desk fan on it for now.'],
@@ -552,7 +552,7 @@ const S: Spec[] = [
   {
     id: '48170', type: 'landlord', title: 'Landlord gas safety record',
     detail: 'Annual gas safety record: boiler and hob. Current record expires 30 Nov.',
-    eq: ['Baxi', '800 Combi 2', 2019, 'gas hob'], cust: ['Harbourside Lettings', 'landlord', 2009],
+    eq: ['Baxi', '800 Combi 2', 2019, 'gas hob'], cust: ['Harbourside Lettings', 'landlord', 2009, 'Harbourside'],
     site: ['Flat 4, 61 Ashley Down Road', 'BS7'], contact: 'Tenant: Liam Doyle',
     date: null, win: null, status: 'on_hold', hold: 'No access on 16 and 20 Nov. Agent chasing the tenant.',
     flags: ['Current gas safety record expires Mon 30 Nov.'],
@@ -593,7 +593,7 @@ export function buildSeed(): Data {
       custId.set(s.cust[0], cid);
       // 07700 900000–900999: Ofcom'un kurgu için ayırdığı aralık
       const n = 100 + ((customers.length * 37 + 11) % 900);
-      customers.push({ id: cid, name: s.cust[0], kind: s.cust[1], phone: `07700 900${String(n).padStart(3, '0')}`, since: s.cust[2] });
+      customers.push({ id: cid, name: s.cust[0], kind: s.cust[1], phone: `07700 900${String(n).padStart(3, '0')}`, since: s.cust[2], ...(s.cust[3] ? { short: s.cust[3] } : {}) });
     }
 
     const date = s.date === undefined ? TODAY : s.date;

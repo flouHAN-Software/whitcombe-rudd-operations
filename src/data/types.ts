@@ -18,6 +18,8 @@ export interface Customer {
   id: string;
   name: string;
   kind: 'household' | 'landlord' | 'business';
+  /** Name on the dispatch board for firms with long names */
+  short?: string;
   phone: string;
   since: number;
 }

@@ -1,4 +1,4 @@
-import type { Job, JobType } from './types';
+import type { Customer, Job, JobType } from './types';
 import { TODAY } from './today';
 import { getLang, t } from '../lib/i18n';
 
@@ -102,6 +102,8 @@ export function statusOf(j: Job, now: number): StatusView {
 }
 
 export const typeLabel = (type: JobType) => t(`type.${type}`);
+/** Shorter wording for narrow places such as a short job on the dispatch board */
+export const typeShort = (type: JobType) => t(`type.${type}.s`);
 
 /** Gaz işleri yalnızca gaz kayıtlı mühendise verilebilir */
 export const needsTrade = (j: Job) =>
@@ -110,8 +112,8 @@ export const needsTrade = (j: Job) =>
 /** Listede kapı numarası gösterilmez: "Flat 3, 61 Ashley Down Road" → "Ashley Down Road" */
 export const street = (line: string) => line.replace(/^Flat \d+,\s*/i, '').replace(/^\d+[A-Za-z]?\s+/, '');
 
-/** Tahtada kısa ad: hanede soyadı, işletmede tam ad */
-export const shortName = (name: string, kind: string) => (kind === 'household' ? name.split(' ').at(-1)! : name);
+/** Name on the board: the surname for a household, the short name (or full name) for a firm */
+export const shortName = (c: Customer) => c.short ?? (c.kind === 'household' ? c.name.split(' ').at(-1)! : c.name);
 
 export const money = (pence: number) =>
   '£' + (pence / 100).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

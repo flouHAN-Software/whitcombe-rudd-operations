@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as
 import { useStore } from '../../data/store';
 import { TODAY } from '../../data/today';
 import type { Data, Engineer, Job } from '../../data/types';
-import { hhmm, nowStamp, shortName, statusOf, street, typeLabel, windowText, type StatusView } from '../../data/derive';
+import { hhmm, nowStamp, shortName, statusOf, street, typeLabel, typeShort, windowText, type StatusView } from '../../data/derive';
 import { DAY_END, DAY_START, SPAN, blockedFor, clampStart, clash, dayJobs, durOf, inWindow, nextFree, slotFor, snap, spanOf } from '../../data/plan';
 import { useDemoMinute } from '../../lib/clock';
 import { go, useRoute } from '../../lib/router';
@@ -47,6 +47,16 @@ function blockLine(j: Job, st: StatusView) {
     case 'live': return st.sub ?? st.label;
     case 'onsite': return t('d.onsite', { s: st.sub ?? '' });
     default: return typeLabel(j.type) + (j.code ? ` · ${j.code}` : '');
+  }
+}
+
+/** The same line for a short job, where the full one would be cut */
+function blockShort(j: Job, st: StatusView) {
+  switch (st.tone) {
+    case 'late': return t('d.late.s', { d: st.sub ?? '' });
+    case 'behind': case 'onsite': return st.label;
+    case 'done': case 'over': case 'live': return blockLine(j, st);
+    default: return typeShort(j.type);
   }
 }
 
@@ -417,13 +427,15 @@ function Block({ job, data, now, onDown, dim }: { job: Job; data: Data; now: num
       data-job={job.id}
       onPointerDown={(ev) => onDown(ev, job, true)}
       onKeyDown={(ev) => { if (ev.key === 'Enter') { ev.preventDefault(); go('dispatch', job.id); } }}
-      // Ad ekrandaki yazıyla başlar (sesle komut verenler için), ardından ayrıntı gelir
-      aria-label={`${shortName(c.name, c.kind)} · ${job.site.area} ${blockLine(job, st)}, ${job.id}, ${c.name}, ${time}`}
       title={`${job.id} · ${td(job.title)}\n${c.name}, ${street(job.site.line)}, ${job.site.area}\n${time} · ${state}${can ? '' : '\n' + t('d.locked')}`}
     >
       {over > 0 && <i className="overrun" style={{ width: over + '%' }} aria-hidden="true" />}
-      <b>{shortName(c.name, c.kind)} · {job.site.area}</b>{' '}
-      <span>{blockLine(job, st)}</span>
+      {/* The area drops out before the name is cut; a short job shows the area under the name instead of the status */}
+      <b className="blk-n"><span>{shortName(c)}</span><span className="blk-a">{'\u00a0· ' + job.site.area}</span></b>
+      <span className="blk-s"><span className="blk-l">{blockLine(job, st)}</span><span className="blk-sh">{blockShort(job, st)}</span></span>
+      <span className="blk-a2">{job.site.area}</span>
+      {/* The name is read from what is on screen (whatever fits this width), then the details: voice control users can say what they see */}
+      <span className="sr-only">, {job.id}, {c.name}, {time}</span>
     </button>
   );
 }
@@ -459,7 +471,7 @@ function Ghost({ job, data, x, y, place }: { job: Job; data: Data; x: number; y:
   const c = data.customers.find((v) => v.id === job.customer)!;
   return (
     <div className="ghost" style={{ transform: `translate(${x + 12}px, ${y + 10}px)` }} aria-hidden="true">
-      <b>{shortName(c.name, c.kind)} · {job.site.area}</b>
+      <b>{shortName(c)} · {job.site.area}</b>
       <span className="tnum">{place?.eng === null ? t('d.ghost.tray') : place ? hhmm(place.start) : t('d.ghost.drop')}</span>
     </div>
   );
@@ -537,7 +549,7 @@ function Agenda({ data, now, tray }: { data: Data; now: number; tray: Job[] }) {
                 <a href={'#/dispatch/' + j.id} className={s[0] <= now && now < s[1] ? 'is-now' : ''}>
                   <span className="tnum ag-time">{hhmm(s[0])}<small>{hhmm(s[1])}</small></span>
                   <span className="ag-what">
-                    <b>{shortName(c.name, c.kind)} · {j.site.area}</b>
+                    <b>{shortName(c)} · {j.site.area}</b>
                     <span>{td(j.title)}</span>
                     <Status view={statusOf(j, now)} />
                   </span>
