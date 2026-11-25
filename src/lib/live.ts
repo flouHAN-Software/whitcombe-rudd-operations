@@ -1,6 +1,6 @@
-// Canlı oturum: aynı oturumdaki cihazlar (ör. bilgisayarda ofis, telefonda teknisyen) aynı veriyi anlık görür.
-// Sunucu: worker/ops-room.js (Cloudflare Durable Object, SQLite). Bağlantı: /api/ops/rooms/<id> (WebSocket).
-// Yalnızca değişen kayıtlar gönderilir (id ile); silinenler ayrıca bildirilir.
+// Live session: devices in the same room (say, the office on a computer and an engineer on a phone) see the same data at once.
+// Server: ops-room.js (a Cloudflare Durable Object with SQLite). Endpoint: /api/ops/rooms/<id> (WebSocket).
+// Only changed records travel, keyed by id; deleted ones are listed separately.
 import type { Data } from '../data/types';
 
 export type Coll = 'jobs' | 'parts' | 'invoices';
@@ -14,7 +14,7 @@ export type LiveStatus = 'off' | 'connecting' | 'live' | 'offline';
 
 const ROOM = /^[a-z0-9]{8}$/;
 
-/** Adresteki ?room=… (yoksa null) */
+/** The ?room=… in the address, or null */
 export function roomFromUrl(): string | null {
   try {
     const r = new URLSearchParams(location.search).get('room');
@@ -30,7 +30,7 @@ export function newRoomId() {
   return [...b].map((x) => abc[x % abc.length]).join('');
 }
 
-/** Oturumu adrese yazar (sayfa yeniden yüklenmez); null verilirse oturumdan çıkar */
+/** Writes the room into the address without a reload; null leaves the room */
 export function setRoomInUrl(room: string | null) {
   const u = new URL(location.href);
   if (room) u.searchParams.set('room', room);
@@ -38,7 +38,7 @@ export function setRoomInUrl(room: string | null) {
   history.replaceState(null, '', u.toString());
 }
 
-/** Önceki ve sonraki veri arasındaki fark (değişmeyen kayıtların nesnesi aynı kalır) */
+/** The difference between two snapshots (unchanged records keep the same object) */
 export function diff(prev: Data, next: Data): Patch | null {
   const p: Patch = { up: {}, del: {} };
   let any = false;
@@ -56,7 +56,7 @@ export function diff(prev: Data, next: Data): Patch | null {
   return any ? p : null;
 }
 
-/** Gelen farkı veriye uygular */
+/** Applies an incoming patch to the data */
 export function apply(data: Data, p: Patch): Data {
   const out = { ...data } as Data;
   for (const k of COLLS) {
@@ -78,7 +78,7 @@ export interface LiveHandlers {
   onStatus: (s: LiveStatus) => void;
 }
 
-/** WebSocket bağlantısı; kopunca artan aralıklarla yeniden bağlanır */
+/** The WebSocket connection; it reconnects with growing gaps when it drops */
 export class LiveConn {
   private ws: WebSocket | null = null;
   private tries = 0;
@@ -141,17 +141,17 @@ export class LiveConn {
   }
 }
 
-/** Diğer cihazdan gelen, ekranda anlatılmaya değer değişiklik (canlı şerit, deneme listesi, telefondaki bildirim) */
+/** A change from another device worth telling the user about (live bar, checklist, phone notice) */
 export type ChangeKind = 'en_route' | 'on_site' | 'done' | 'assigned' | 'moved' | 'other';
 export interface Change {
   kind: ChangeKind;
   job: string;
   eng: string | null;
-  /** İşe eklenen son kaydı yazan kişi (teknisyen ya da ofis) */
+  /** Who wrote the latest entry on the job (the engineer or the office) */
   by: string | null;
 }
 
-/** İki veri arasındaki iş değişikliklerini anlatılabilir olaylara çevirir */
+/** Turns job changes between two snapshots into events that can be described */
 export function changes(prev: Data, next: Data): Change[] {
   if (prev.jobs === next.jobs) return [];
   const old = new Map(prev.jobs.map((j) => [j.id, j]));

@@ -11,10 +11,10 @@ import { go } from '../lib/router';
 import { routeById, type RouteId } from '../lib/routes';
 import type { Key } from '../lib/strings';
 
-// Kullanım rehberi: ilk girişte açılır, menüdeki "Nasıl kullanılır" ile yeniden açılır.
-// Panelin ne işe yaradığını, hangi ekranın ne yaptığını, önce neyin denenmesi gerektiğini
-// ve iki cihazla canlı denemenin amacını (neyi canlandırdığı, neyin kontrol edileceği) anlatır.
-// Klavye kısayolu anlatmaz (kullanıcı kararı: işaretler gereksiz kalabalık).
+// The full guide: opens from the welcome card, "How it works" in the menu and the sign-in screen.
+// It explains what the dashboard is for, what each screen does, what to try first,
+// and what the two-device live session stands for and what to check in it.
+// It does not list keyboard shortcuts on purpose: they work, but showing them only adds clutter.
 
 const SCREENS: RouteId[] = ['today', 'jobs', 'dispatch', 'stock', 'customers', 'invoices', 'reports', 'field'];
 const TRY: { text: Key; go: Key; route: RouteId | 'live' }[] = [
@@ -24,7 +24,7 @@ const TRY: { text: Key; go: Key; route: RouteId | 'live' }[] = [
   { text: 'gd.t4', go: 'gd.t4.go', route: 'live' }
 ];
 
-/** Rehberi her yerden açar (uygulamanın üst katmanı dinler; dil değişince kapanmaz) */
+/** Opens the guide from anywhere (the app's root listens; a language switch keeps it open) */
 export const openGuide = () => window.dispatchEvent(new Event('wr:guide'));
 
 export function Guide({ onClose }: { onClose: () => void }) {
@@ -35,7 +35,7 @@ export function Guide({ onClose }: { onClose: () => void }) {
     onClose();
   }, [prefs.chosen, set, onClose]);
 
-  // Rehberdeki düğmeler ofis ekranlarına gider: hesap yoksa ya da teknisyen hesabıysa ofis hesabıyla girilir
+  // The guide's buttons lead to office screens, so without an account, or with an engineer one, they sign in as the office
   const open = (r: RouteId | 'live') => {
     if (account?.role !== 'office') signIn({ role: 'office' });
     done();

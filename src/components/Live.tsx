@@ -11,10 +11,10 @@ import type { Key } from '../lib/strings';
 import type { Engineer } from '../data/types';
 import type { LiveStatus } from '../lib/live';
 
-// Canlı oturum arayüzü: pencere (karekod, bağlantı, durum) ve oturumdayken üstte duran ince şerit.
+// Live-session interface: the dialog (QR code, link, status) and the thin bar shown during a session.
 
-/** Pencereyi her yerden açar (App dinler) */
-// Bekleyen istek: pencere, ofis kabuğu henüz kurulmadan istenirse (giriş + rehber) kabuk kurulunca açılır
+/** Opens the dialog from anywhere (App listens) */
+// A pending request: if the dialog is asked for before the office shell is mounted, it opens once the shell is there
 let pending = false;
 export const openLive = () => {
   pending = true;
@@ -26,7 +26,7 @@ export const takeLive = () => {
   return p;
 };
 
-/** Karekod: tarayıcı kamerasının okuyabilmesi için temadan bağımsız siyah-beyaz */
+/** QR code: black on white whatever the theme, so phone cameras can read it */
 function Qr({ text }: { text: string }) {
   const { n, d } = useMemo(() => {
     const qr = qrcode(0, 'M');
@@ -52,7 +52,7 @@ function statusText(s: LiveStatus, peers: number) {
   return t('lv.st.off');
 }
 
-/** Canlı denemenin üç adımı: telefonda ne yapılır, bilgisayarda ne görülür. Pencerede kendiliğinden işaretlenir. */
+/** The three live-session checks: what to do on the phone, what to see on the computer. They tick themselves in the dialog. */
 const STEPS: { id: keyof Checks; do: Key; see: Key }[] = [
   { id: 'way', do: 'lc.way.do', see: 'lc.way.see' },
   { id: 'finish', do: 'lc.fin.do', see: 'lc.fin.see' },
@@ -79,10 +79,10 @@ export function LiveChecks({ checks }: { checks?: Checks }) {
   );
 }
 
-/** Diğer cihazdan gelen değişikliğin cümlesi: "Gemma Hale WR-48212 için yola çıktı" */
+/** The sentence for a change from another device: "Gemma Hale set off for WR-48212" */
 export function changeText(e: LiveEvent, engineers: Engineer[]) {
   const eng = engineers.find((x) => x.id === e.eng)?.name ?? '';
-  // Durumu teknisyen değil ofis işaretlediyse: "Ellie Whitcombe WR-48212 için varışı işaretledi"
+  // When the office, not the engineer, set the status: "Ellie Whitcombe marked WR-48212 as arrived"
   const marked = e.by && eng && e.by !== eng && (e.kind === 'en_route' || e.kind === 'on_site' || e.kind === 'done');
   return { by: e.by ?? t('lv.someone'), what: t(`lv.${marked ? 'm' : 'c'}.${e.kind}` as Key, { id: e.job, eng }) };
 }
@@ -101,13 +101,13 @@ export function LiveDialog({ onClose }: { onClose: () => void }) {
   const { live } = useStore();
   const { prefs } = usePrefs();
   const [copied, setCopied] = useState(false);
-  // Oturum başlayınca 'Oturumu başlat' düğmesi kalkar; odak kaybolmasın (Esc ve klavye çalışsın)
+  // Starting the session removes the "Start a session" button; move focus so Escape and the keyboard keep working
   const copyBtn = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (live.room) copyBtn.current?.focus({ preventScroll: true });
   }, [live.room]);
 
-  // Telefona giden bağlantı: aynı oturum, aynı dil ve tema, doğrudan teknisyen uygulaması
+  // The link for the phone: same room, same language and theme, straight into the engineer app
   const link = useMemo(() => {
     if (!live.room) return '';
     const u = new URL(location.href);
@@ -115,7 +115,7 @@ export function LiveDialog({ onClose }: { onClose: () => void }) {
     u.searchParams.set('room', live.room);
     u.searchParams.set('lang', getLang());
     u.searchParams.set('theme', prefs.theme);
-    // telefon, teknisyen Gemma Hale'in hesabıyla açılır (rehbersiz, giriş ekranı olmadan)
+    // the phone opens as Gemma Hale, the engineer, with no welcome and no sign-in screen
     u.searchParams.set('as', LIVE_ENGINEER);
     u.hash = '#/field';
     return u.toString();
@@ -127,7 +127,7 @@ export function LiveDialog({ onClose }: { onClose: () => void }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      /* pano izni yok: bağlantı ekranda zaten yazılı */
+      /* no clipboard permission: the link is written on screen anyway */
     }
   }
 
@@ -179,7 +179,7 @@ export function LiveDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-/** Oturumdayken içeriğin üstünde ince şerit */
+/** The thin bar above the content during a session */
 export function LiveBar({ office = true }: { office?: boolean }) {
   const { live, state } = useStore();
   if (!live.room) return null;
@@ -190,7 +190,7 @@ export function LiveBar({ office = true }: { office?: boolean }) {
       <b>{t('lv.bar')}</b>
       <LiveStatusLine />
       {last && live.last ? (
-        // yeni olay gelince şerit kısa bir an vurgulanır (key ile yeniden kurulur)
+        // a new event briefly highlights the bar (the key remounts it)
         <span key={live.last.n} className="lv-bar-last" role="status">
           <span className="lv-bar-k">{t('lv.last')}</span> <b>{last.by}</b> {last.what} <span className="tnum lv-bar-t">{hhmm(live.last.at)}</span>
         </span>

@@ -1,19 +1,19 @@
-// Operasyon paneli demosu: canlı oturum (birden çok cihaz aynı veriyi anlık görür).
-// Bir oturum = bir Durable Object (SQLite depolamalı). Cihazlar WebSocket ile bağlanır.
+// Operations dashboard demo: the live session (several devices see the same data at the same moment).
+// One session = one Durable Object with SQLite storage. Devices connect over WebSocket.
 //
 // GET /api/ops/rooms/:id   (Upgrade: websocket)
-//   :id 8 karakter (a-z, 0-9), tarayıcıda rastgele üretilir; oturum bağlantısı bilen herkes katılabilir.
+//   :id is 8 characters (a-z, 0-9), made at random in the browser; anyone with the session link can join.
 //
-// Mesajlar (JSON)
-//   cihaz → sunucu  { t: 'seed', data: { jobs, parts, invoices }, t0 }   oturum boşsa ilk veri ve demo saatinin başlangıcı
-//                   { t: 'patch', up: { jobs?: [...], ... }, del: { invoices?: ['INV-…'], ... } }   değişen kayıtlar (id ile)
-//   sunucu → cihaz  { t: 'state', data | null, t0, peers }   bağlanınca bütün veri
-//                   { t: 'patch', up, del }                 başka bir cihazın değişikliği
-//                   { t: 'peers', n }                       bağlı cihaz sayısı
+// Messages (JSON)
+//   device → server { t: 'seed', data: { jobs, parts, invoices }, t0 }   first data and demo clock start, if the room is empty
+//                   { t: 'patch', up: { jobs?: [...], ... }, del: { invoices?: ['INV-…'], ... } }   changed records, by id
+//   server → device { t: 'state', data | null, t0, peers }   all of the data, on connect
+//                   { t: 'patch', up, del }                 a change made on another device
+//                   { t: 'peers', n }                       number of connected devices
 //
-// Koruma: yalnızca sitenin kendi sayfasından bağlantı, mesaj en fazla 300 KB, cihaz başına 10 saniyede 40 mesaj,
-// oturumda en fazla 12 cihaz, yalnızca bilinen üç koleksiyon ve id'li kayıtlar; 24 saat kimse bağlanmazsa oturum silinir.
-// Veriler kurgusal demo verisidir; kişisel veri tutulmaz.
+// Limits: connections from the site's own pages only, 300 KB per message, 40 messages per 10 seconds per device,
+// 12 devices per room, three known collections and records with an id. A room nobody joins for 24 hours is deleted.
+// The data is made-up demo data; no personal data is kept.
 import { DurableObject } from 'cloudflare:workers';
 
 const ROOM = /^[a-z0-9]{8}$/;
@@ -25,12 +25,12 @@ const RATE_WINDOW = 10_000;
 const RATE_MAX = 40;
 const IDLE_MS = 24 * 60 * 60 * 1000;
 
-/** /api/ops/… istekleri (worker/index.js buraya yönlendirir) */
+/** Requests to /api/ops/… (routed here by the Worker's entry file) */
 export async function ops(request, env, url) {
   const parts = url.pathname.split('/').filter(Boolean); // ['api', 'ops', 'rooms', id]
   if (parts[2] !== 'rooms' || parts.length !== 4 || !ROOM.test(parts[3])) return json({ ok: false, error: 'not_found' }, 404);
   if ((request.headers.get('Upgrade') || '').toLowerCase() !== 'websocket') return json({ ok: false, error: 'upgrade' }, 426);
-  // Tarayıcı WebSocket isteğine Origin ekler; başka siteden bağlanılamaz
+  // Browsers send an Origin header with the WebSocket request, so other sites cannot connect
   if (request.headers.get('Origin') !== url.origin) return json({ ok: false, error: 'origin' }, 403);
   const stub = env.OPS_ROOM.get(env.OPS_ROOM.idFromName(parts[3]));
   return stub.fetch(request);
@@ -68,7 +68,7 @@ export class OpsRoom extends DurableObject {
     if (m.t === 'seed') {
       const cur = await this.load();
       if (cur) {
-        // Oturum başka bir cihazca zaten doldurulmuş: onun verisi geçerli
+        // Another device has already filled the room: its data wins
         ws.send(JSON.stringify({ t: 'state', data: cur, t0: (await this.ctx.storage.get('t0')) ?? null, peers: this.ctx.getWebSockets().length }));
         return;
       }
@@ -131,12 +131,12 @@ export class OpsRoom extends DurableObject {
     const s = JSON.stringify(obj);
     for (const w of this.ctx.getWebSockets()) {
       if (w === except) continue;
-      try { w.send(s); } catch { /* kopmuş bağlantı */ }
+      try { w.send(s); } catch { /* connection already gone */ }
     }
   }
 }
 
-/** Yalnızca id'si olan düz nesnelerden oluşan, sınırlı uzunlukta liste */
+/** A list of plain objects that all have an id, with a length limit */
 function cleanList(v) {
   if (!Array.isArray(v) || v.length > MAX_ITEMS) return null;
   for (const x of v) {

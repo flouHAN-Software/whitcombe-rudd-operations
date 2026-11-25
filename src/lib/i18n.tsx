@@ -67,6 +67,6 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
 
 export function usePrefs() {
   const c = useContext(C);
-  if (!c) throw new Error('PrefsProvider eksik');
+  if (!c) throw new Error('PrefsProvider is missing');
   return c;
 }

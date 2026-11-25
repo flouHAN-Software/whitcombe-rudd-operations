@@ -6,7 +6,7 @@ import { LiveConn, apply, changes, diff, newRoomId, roomFromUrl, setRoomInUrl, t
 import { clockStart, demoMinute, syncClock } from '../lib/clock';
 import { LIVE_ENGINEER } from '../lib/account';
 
-// Veri ayrı bir parça olarak yüklenir (gerçek bir yükleme anı); değişiklikler localStorage'da tutulur.
+// The data loads as a separate chunk (a real loading moment); changes are kept in localStorage.
 const JOBS_KEY = 'jobs.v1';
 const PARTS_KEY = 'parts.v1';
 const INVOICES_KEY = 'invoices.v1';
@@ -15,9 +15,9 @@ type State = { phase: 'loading' } | { phase: 'error' } | { phase: 'ready'; data:
 
 type NewEvent = Omit<JobEvent, 'by'> & { by?: string };
 
-/** Diğer cihazdan gelen son değişiklik (n her olayda artar; at = demo dakikası) */
+/** The latest change from another device (n grows with each event; at = demo minute) */
 export interface LiveEvent extends Change { n: number; at: number }
-/** Canlı oturum deneme listesi: diğer cihazda yapılıp burada görülenler */
+/** Live-session checklist: things done on the other device and seen here */
 export interface LiveChecks { way: boolean; finish: boolean; assign: boolean }
 const NO_CHECKS: LiveChecks = { way: false, finish: false, assign: false };
 
@@ -26,13 +26,13 @@ interface Store {
   retry: () => void;
   saveFailed: boolean;
   updateJob: (id: string, patch: Partial<Job>, event?: NewEvent | NewEvent[]) => void;
-  /** Geri alma: işi önceki hâline döndürür */
+  /** Undo: puts a job back the way it was */
   restoreJob: (job: Job) => void;
-  /** Parçaları toplu değiştirir (sipariş, depoya giriş, araca verme) */
+  /** Changes parts in bulk (ordering, booking into the depot, loading a van) */
   setParts: (fn: (parts: Part[]) => Part[]) => void;
-  /** Faturaları değiştirir (gönderme, ödeme, hatırlatma) */
+  /** Changes invoices (sending, payments, reminders) */
   setInvoices: (fn: (invoices: Invoice[]) => Invoice[]) => void;
-  /** Canlı oturum: aynı oturumdaki cihazlar aynı veriyi anlık görür (lib/live.ts) */
+  /** Live session: devices in the same room see the same data at once (lib/live.ts) */
   live: { room: string | null; status: LiveStatus; peers: number; last: LiveEvent | null; checks: LiveChecks; start: () => string; stop: () => void };
 }
 
@@ -48,7 +48,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [attempt, setAttempt] = useState(0);
   const dirty = useRef(false);
 
-  // canlı oturum
+  // live session
   const [room, setRoom] = useState<string | null>(() => roomFromUrl());
   const [status, setStatus] = useState<LiveStatus>('off');
   const [peers, setPeers] = useState(0);
@@ -60,9 +60,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const conn = useRef<LiveConn | null>(null);
   const latest = useRef<State>(state);
   latest.current = state;
-  /** Sunucunun bildiği son veri; yerel değişiklik bununla karşılaştırılıp yalnızca fark gönderilir */
+  /** The last data the server knows about; local changes are compared with it and only the difference is sent */
   const synced = useRef<Data | null>(null);
-  /** Bir sonraki durum değişikliği sunucudan geldi: geri gönderilmez */
+  /** The next state change came from the server, so it is not sent back */
   const fromServer = useRef(false);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [attempt]);
 
-  // Canlı oturuma bağlan (veri hazır olduktan sonra)
+  // Join the live session once the data is ready
   const ready = state.phase === 'ready';
   useEffect(() => {
     if (!room || !ready) return;
@@ -100,7 +100,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const cur = latest.current;
         if (cur.phase !== 'ready') return;
         if (!data) {
-          // Oturum boş: bu cihazın verisiyle doldurulur, demo saati de bu cihazınki olur
+          // Empty room: fill it with this device's data, and this device's demo clock
           synced.current = cur.data;
           c.send({ t: 'seed', data: { jobs: cur.data.jobs, parts: cur.data.parts, invoices: cur.data.invoices }, t0: clockStart() });
           return;
@@ -132,7 +132,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     };
   }, [room, ready]);
 
-  // Yerel değişikliği oturuma gönder (sunucudan geleni geri göndermez)
+  // Send local changes to the room (but not the ones that came from the server)
   useEffect(() => {
     if (state.phase !== 'ready' || !conn.current) return;
     if (fromServer.current) { fromServer.current = false; return; }
@@ -144,7 +144,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     synced.current = state.data;
   }, [state]);
 
-  // Değişiklikleri anlatır: diğer cihazdan gelen son olay şeritte görünür, deneme listesi kendiliğinden işaretlenir
+  // Describe changes: the latest one from another device shows in the live bar, and the checklist ticks itself
   function note(ch: Change[], remote: boolean) {
     if (!ch.length) return;
     if (remote) setLast({ ...ch[ch.length - 1], n: ++seq.current, at: demoMinute() });
@@ -156,7 +156,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }));
   }
 
-  // Oturum değişince deneme listesi ve son olay sıfırlanır
+  // A new room starts with an empty checklist and no last event
   useEffect(() => {
     setLast(null);
     setChecks(NO_CHECKS);
@@ -172,11 +172,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setRoomInUrl(null);
     setRoom(null);
     setPeers(0);
-    // oturumdan çıkınca bu cihazın kendi verisine dönülür
+    // leaving the room brings back this device's own data
     setAttempt((a) => a + 1);
   }, []);
 
-  // Yalnızca kullanıcı bir şey değiştirdiyse kaydet; canlı oturumdayken bu cihazın kendi kaydına dokunulmaz
+  // Save only after the user changed something; in a live session this device's own copy is left alone
   useEffect(() => {
     if (state.phase !== 'ready' || !dirty.current || room) return;
     const ok = save(JOBS_KEY, state.data.jobs) && save(PARTS_KEY, state.data.parts) && save(INVOICES_KEY, state.data.invoices);
@@ -192,7 +192,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const jobs = s.data.jobs.map((j) => {
         if (j.id !== id) return j;
         const next = { ...j, ...patch, events: [...j.events, ...add] };
-        // İş bitince taslak fatura kendiliğinden açılır (keşif ve montaj hariç)
+        // Finishing a job opens a draft invoice on its own (not for surveys and installs)
         if (patch.status === 'done' && j.status !== 'done' && !invoices.some((i) => i.job === id)) {
           const c = s.data.customers.find((x) => x.id === j.customer);
           const inv = c ? draftFor(next, c, s.data.parts, nextInvoiceId(invoices), add[0]?.at ?? `${j.date}T12:00`) : null;
@@ -226,6 +226,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
 export function useStore() {
   const s = useContext(Ctx);
-  if (!s) throw new Error('DataProvider eksik');
+  if (!s) throw new Error('DataProvider is missing');
   return s;
 }

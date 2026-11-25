@@ -5,13 +5,13 @@ import { openGuide } from './Guide';
 import { getLang, t } from '../lib/i18n';
 import type { Key } from '../lib/strings';
 
-// "Bu proje hakkında": nasıl kullanılır, bu projede yapılan işler (her biri projedeki somut bir parçaya bağlı),
-// kullanılan diller ve araçlar, bu yapıyla neler yapılabileceği, kaynak kod ve lisans.
-// Menüden, rehberden, giriş ekranından ve hesap penceresinden açılır.
+// "About this project": how to use it, what was built (each item tied to a real part of the code),
+// languages and tools, what the same structure can be used for, source code and licence.
+// Opens from the menu, the guide, the sign-in screen and the account dialog.
 
 export const REPO = 'https://github.com/flouHAN-Software/whitcombe-rudd-operations';
 
-/** Pencereyi her yerden açar (uygulamanın üst katmanı dinler) */
+/** Opens the dialog from anywhere (the app's root listens) */
 export const openAbout = () => window.dispatchEvent(new Event('wr:about'));
 
 const HOW: Key[] = ['ab.how.1', 'ab.how.2', 'ab.how.3', 'ab.how.4'];
@@ -24,11 +24,11 @@ const BUILT: [Key, Key][] = [
   ['ab.b.ui', 'ab.b.ui.t'],
   ['ab.b.qa', 'ab.b.qa.t']
 ];
-// Yalnızca bu projede gerçekten kullanılanlar
+// Only what this project really uses
 const TOOLS = ['TypeScript', 'React', 'Vite', 'CSS', 'JavaScript', 'Cloudflare Workers', 'Durable Objects', 'SQLite', 'WebSocket', 'Node.js', 'Playwright', 'axe-core', 'ffmpeg', 'Git'];
 const CAN: Key[] = ['ab.can.acc', 'ab.can.sms', 'ab.can.map', 'ab.can.pay', 'ab.can.sso', 'ab.can.ai'];
 
-/** En alttaki telif satırı */
+/** The copyright line at the very bottom */
 export function Copyright({ className = '' }: { className?: string }) {
   return <p className={'copy ' + className}>{t('copy')}</p>;
 }

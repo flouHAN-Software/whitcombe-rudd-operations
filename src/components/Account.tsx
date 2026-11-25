@@ -10,15 +10,15 @@ import { t, td } from '../lib/i18n';
 import { go } from '../lib/router';
 import type { Engineer } from '../data/types';
 
-// Giriş ekranı (hesap seçilmemişse) ve hesap penceresi (kim giriş yaptı, hesap değiştir, çıkış).
-// Demo hesapları parola istemez; yetki rolden gelir: ofis her ekranı, teknisyen yalnızca kendi gününü görür.
+// The sign-in screen (when no account is chosen) and the account dialog (who is signed in, switch, sign out).
+// Demo accounts have no password; permissions come from the role: the office sees every screen, an engineer only their own day.
 
 export const OFFICE = { name: 'Ellie Whitcombe', initials: 'EW' };
 
-/** Hesap penceresini her yerden açar (App dinler) */
+/** Opens the account dialog from anywhere (App listens) */
 export const openAccount = () => window.dispatchEvent(new Event('wr:account'));
 
-/** Hesaba göre açılış ekranı: ofis Bugün'e, teknisyen kendi uygulamasına */
+/** Where each account lands: the office on Today, an engineer in their app */
 export function enter(a: Account, signIn: (a: Account) => void) {
   signIn(a);
   go(a.role === 'engineer' ? 'field' : 'today');
@@ -167,7 +167,7 @@ export function AccountDialog({ onClose }: { onClose: () => void }) {
         </button>
       </div>
       <p className="lv-small">{t('si.note')}</p>
-      {/* teknisyen kabuğunda sol menü yok: dil, tema ve rehber buradan */}
+      {/* the engineer shell has no side menu, so language, theme and the guide live here */}
       <div className="ac-prefs">
         <span className="ac-prefs-l">
           <button type="button" className="btn btn-quiet" onClick={() => { onClose(); openGuide(); }}>

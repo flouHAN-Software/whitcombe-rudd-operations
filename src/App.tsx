@@ -21,7 +21,7 @@ import { useStore } from './data/store';
 
 type Layer = null | 'cmd' | 'more' | 'live' | 'account';
 
-/** Pencereleri her yerden açan olaylar (rehber, menü, hesap düğmesi) */
+/** Events that open dialogs from anywhere (guide, menu, account button) */
 function useLayerEvents(setLayer: (l: Layer) => void) {
   useEffect(() => {
     const live = () => { takeLive(); setLayer('live'); };
@@ -42,7 +42,7 @@ export default function App() {
   return eng ? <EngineerApp eng={eng} /> : <OfficeApp />;
 }
 
-/** Teknisyen hesabı: yalnızca kendi günü. Ofis ekranları bu hesaba kapalıdır (adres yazılsa da açılmaz). */
+/** Engineer account: their own day only. Office screens stay closed, even if the address is typed in. */
 function EngineerApp({ eng }: { eng: string }) {
   const { route } = useRoute();
   const { state } = useStore();
@@ -82,7 +82,7 @@ function EngineerApp({ eng }: { eng: string }) {
         <FieldPage />
         <Copyright className="eng-copy" />
       </main>
-      {/* rehber bu hesapta da açılır; canlı oturum penceresi ofis hesabına aittir */}
+      {/* the guide opens here too; the live-session dialog belongs to the office account */}
       {layer === 'account' && <AccountDialog onClose={close} />}
     </div>
   );
@@ -103,7 +103,7 @@ function OfficeApp() {
     document.title = `${label} · Whitcombe & Rudd`;
   }, [label]);
 
-  // Vaka sayfasındaki "telefonunuzla deneyin" bağlantısı (?live=1): oturum hemen başlar, karekod açılır
+  // "Try it on two devices" on the case page (?live=1): the session starts at once and the QR code opens
   useEffect(() => {
     const u = new URL(location.href);
     if (!u.searchParams.has('live')) return;
@@ -111,11 +111,11 @@ function OfficeApp() {
     history.replaceState(null, '', u.toString());
     if (!live.room) live.start();
     setLayer('live');
-    // yalnızca açılışta bir kez
+    // once, on load
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Genel kısayollar: Ctrl/⌘ K, /, ?, G sonra harf
+  // Keyboard shortcuts (not shown on screen): Ctrl/⌘ K, /, ?, and G then a letter
   useEffect(() => {
     let gAt = 0;
     function onKey(e: KeyboardEvent) {
