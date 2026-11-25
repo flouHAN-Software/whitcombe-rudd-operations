@@ -12,10 +12,11 @@ import type { Key } from '../lib/strings';
 // It says what the app is, what to try first, and links to the full guide (every screen explained)
 // and to the engineer account. It is not modal: the dashboard behind it stays usable.
 
-const TRY: { text: Key; run: () => void }[] = [
-  { text: 'wc.t1', run: () => go('dispatch') },
-  { text: 'wc.t2', run: () => go('field') },
-  { text: 'wc.t3', run: () => { go('dispatch'); openLive(); } }
+// Each step has a long label for wider screens and a short one for phones (CSS picks one).
+const TRY: { text: Key; short: Key; run: () => void }[] = [
+  { text: 'wc.t1', short: 'wc.t1.s', run: () => go('dispatch') },
+  { text: 'wc.t2', short: 'wc.t2.s', run: () => go('field') },
+  { text: 'wc.t3', short: 'wc.t3.s', run: () => { go('dispatch'); openLive(); } }
 ];
 
 export function Welcome() {
@@ -42,14 +43,14 @@ export function Welcome() {
         </button>
       </div>
       <h2 id="wc-title">{t('wc.title')}</h2>
-      <p className="wc-text">{t('wc.text')}</p>
+      <p className="wc-text"><span className="wc-l">{t('wc.text')}</span><span className="wc-s">{t('wc.text.s')}</span></p>
       <h3>{t('wc.try')}</h3>
       <ol className="wc-try">
         {TRY.map((x, i) => (
           <li key={x.text}>
             <button type="button" onClick={() => { done(); x.run(); }}>
               <span className="wc-n" aria-hidden="true">{i + 1}</span>
-              <span>{t(x.text)}</span>
+              <span><span className="wc-l">{t(x.text)}</span><span className="wc-s">{t(x.short)}</span></span>
               <Icon name="chevron" size={14} />
             </button>
           </li>

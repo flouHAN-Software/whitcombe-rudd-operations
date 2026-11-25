@@ -219,6 +219,18 @@ button.me:hover { background: var(--nav-hover); }
 .wc-n { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--cu); color: var(--on-cu); font-size: 14px; font-weight: 620; }
 .wc-foot { display: flex; flex-wrap: wrap; gap: 2px 4px; margin: 10px -8px 0; }
 .wc-foot .btn { height: 36px; padding: 0 8px; }
+@media (min-width: 768px) { .wc-s { display: none; } }
+/* Phone: a compact card that leaves most of the dashboard visible (about a third of the screen) */
 @media (max-width: 767px) {
-  .wc { left: 8px; right: 8px; width: auto; bottom: calc(var(--tabbar) + env(safe-area-inset-bottom) + 8px); max-height: calc(100dvh - var(--tabbar) - 76px); }
+  .wc { left: 8px; right: 8px; width: auto; bottom: calc(var(--tabbar) + env(safe-area-inset-bottom) + 8px); max-height: calc(100dvh - var(--tabbar) - 76px); padding: 10px 12px 6px 14px; }
+  .wc-l { display: none; }
+  .wc-head { margin: -2px -6px 0 0; }
+  .wc h2 { font-size: 17px; line-height: 22px; }
+  .wc-text { margin-top: 2px; font-size: 14px; line-height: 20px; }
+  .wc h3 { display: none; }
+  .wc-try { margin-top: 10px; }
+  .wc-try button { padding: 6px 10px; }
+  .wc-foot { justify-content: space-between; margin: 4px -6px 0; }
+  .wc-foot .btn { height: 40px; padding: 0 4px; font-size: 14px; white-space: nowrap; }
+  .wc-foot .btn svg { display: none; }
 }

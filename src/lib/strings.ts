@@ -852,12 +852,17 @@ export const STR = {
   'wc.tag': ['Concept project · flouHAN Software', 'Konsept çalışma · flouHAN Software'],
   'wc.title': ['Whitcombe & Rudd operations dashboard', 'Whitcombe & Rudd operasyon paneli'],
   'wc.text': ['The office system and the engineers’ phone app of a service firm. You are in the office as Ellie, the operations director, on a Monday at 10:34.', 'Bir servis firmasının ofis sistemi ve teknisyenlerinin telefon uygulaması. Şu an ofistesiniz: operasyon müdürü Ellie’nin yerindesiniz, günlerden Pazartesi, saat 10:34.'],
+  'wc.text.s': ['You are in the office as Ellie, the operations director. It is Monday, 10:34.', 'Ofiste, operasyon müdürü Ellie’nin yerindesiniz. Günlerden Pazartesi, saat 10:34.'],
   'wc.try': ['Try these first', 'Önce bunları deneyin'],
   'wc.t1': ['Give a waiting job to an engineer', 'Havuzdaki bir işi bir teknisyene verin'],
   'wc.t2': ['Be the engineer: set off, arrive, finish', 'Teknisyen olun: yola çıkın, varın, işi bitirin'],
   'wc.t3': ['Link your phone and watch both screens change', 'Telefonunuzu bağlayın, iki ekranın birlikte değiştiğini görün'],
-  'wc.guide': ['What each screen does', 'Hangi ekran ne işe yarar?'],
-  'wc.eng': ['Sign in as an engineer instead', 'Teknisyen olarak girin'],
+  // telefonda daha kısa söyleniş
+  'wc.t1.s': ['Give a waiting job to an engineer', 'Havuzdaki bir işi teknisyene verin'],
+  'wc.t2.s': ['Finish a job as the engineer', 'Teknisyen olarak bir işi bitirin'],
+  'wc.t3.s': ['Try it live with a second device', 'İkinci bir cihazla canlı deneyin'],
+  'wc.guide': ['What each screen does', 'Ekranlar ne işe yarar?'],
+  'wc.eng': ['Sign in as an engineer', 'Teknisyen olarak girin'],
   'wc.close': ['Close the welcome', 'Karşılamayı kapat'],
 
   // ilk giriş
