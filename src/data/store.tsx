@@ -1,10 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Data, Invoice, Job, JobEvent, Part } from './types';
 import { draftFor, nextInvoiceId } from './billing';
 import { load, save } from '../lib/storage';
 import { LiveConn, apply, changes, diff, newRoomId, roomFromUrl, setRoomInUrl, type Change, type LiveStatus } from '../lib/live';
 import { clockStart, demoMinute, syncClock } from '../lib/clock';
 import { LIVE_ENGINEER } from '../lib/account';
+import { usePrefs } from '../lib/i18n';
 
 // The data loads as a separate chunk (a real loading moment); changes are kept in localStorage.
 const JOBS_KEY = 'jobs.v1';
@@ -221,7 +222,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const retry = useCallback(() => setAttempt((a) => a + 1), []);
 
-  return <Ctx.Provider value={{ state, retry, saveFailed, updateJob, restoreJob, setParts, setInvoices, live: { room, status, peers, last, checks, start, stop } }}>{children}</Ctx.Provider>;
+  // Customers are not part of the live session (each device builds them from the seed), so their names can
+  // follow the interface language here: a couple reads "Priya ve Tom Ashdown" in Turkish
+  const { prefs } = usePrefs();
+  const shown = useMemo<State>(() => {
+    if (state.phase !== 'ready' || prefs.lang !== 'tr') return state;
+    const customers = state.data.customers.map((c) => (c.kind === 'household' && c.name.includes(' and ') ? { ...c, name: c.name.replace(' and ', ' ve ') } : c));
+    return { ...state, data: { ...state.data, customers } };
+  }, [state, prefs.lang]);
+
+  return <Ctx.Provider value={{ state: shown, retry, saveFailed, updateJob, restoreJob, setParts, setInvoices, live: { room, status, peers, last, checks, start, stop } }}>{children}</Ctx.Provider>;
 }
 
 export function useStore() {
